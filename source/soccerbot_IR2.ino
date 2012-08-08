@@ -11,6 +11,10 @@
 #define IR_RECEIVER_BUFFER_SIZE 10
 #define IR_RECEIVER_SIGNAL_MAX_LENGTH 6000
 /*
+
+In IR2, the comment out section, it is a piece of work in progress code for decoding of simple PWM signal, 
+i decided to code my own as i feel all the current TV control protocols are having too low a bandwidth.
+
 class IRreceiver {
 public:
   IRreceiver(int pin){
