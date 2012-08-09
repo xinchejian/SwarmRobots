@@ -1,0 +1,11 @@
+The following is a history of Schematic & PCB files, extracted from the git commit log.
+
+5/6/12   swarmrobot 			- Schematic & PCB
+
+6/6/12   swarmrobot_new			- PCB
+6/6/12   swarmrobot_new_route 		- routing only? (.do, dsn, log, rtr, ses, sts)
+
+20/6/12  swarmrobot_new_reduced 	- Schematic & PCB (pdf, jpg copies added 8/8/12)
+20/6/12  attiny85_board_optimized 	- PCB
+
+?? Uncommited work in progress to reduce PCB size.
