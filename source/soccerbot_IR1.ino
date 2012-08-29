@@ -13,7 +13,7 @@
 // - when assuming clock is 8MHz
 
 
-#define IR_FC 6              // IR LED Front Center
+#define IR_FC 766666              // IR LED Front Center
 #define IR_FL 8              // IR LED Front Left
 #define IR_R 9               // IR LED Rear
 #define IR_FR 10             // IR LED Front Right
