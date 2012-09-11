@@ -15,12 +15,11 @@ Each basic robot contains the following:
 	- 1x motor controller L293D
 	- 2x gear motors
 	- 1x LiPo battery 3.7V
-	- 1x IR sensor + IR emitter
-	- 1x microfon
+	Sensor shield
 
 A custom made PCB will be used. This PCB will be mounted into a 3D printed casing which contains the gear motors and the wheels as well the IR sensor array.
 
-Maximum price for the basic robot should not exceed 5US$
+Goal is that the maximum price for the basic robot should not exceed 5US$ (without shield)
 
 
 Each robot will have a basic programming and basic hardware platform. 
@@ -43,7 +42,10 @@ Folder structure:
 
 /kicad kicad schematics and PCB design files
 
-More at the XinCheJian website www.xinchejian.com
+More at the XinCheJian website wiki.xinchejian.com 
+	- the original Swarmrobot pages at http://wiki.xinchejian.com/wiki/Swarm_robots
+	- collated summary and AFRON competition entry
+		 - URL not yet published, but after 15/9/2012 you will find it via 
+				http://wiki.xinchejian.com/wiki/Category:AFRON_$10_Robot_Competition
 
-//Will be updated...
 
