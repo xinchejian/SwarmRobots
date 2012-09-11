@@ -51,6 +51,18 @@ Folder structure:
 		- size of memory limits size of code
 		- AtTiny versions have fewer IO commands available. See http://wiki.xinchejian.com/wiki/Programming-AFRON
 
+Branches & master
+	- Please use branches to do YOUR work before committing back to the master!
+	- Goal is for the master to be 'production ready' at ALL TIMES!
+
+Sample Git info:
+    http://kentnguyen.com/development/visualized-git-practices-for-team/
+    http://gitref.org/branching/
+    http://marklodato.github.com/visual-git-guide/index-en.html
+    http://think-like-a-git.net/
+    https://github.com/diaspora/diaspora/wiki/Git-Workflow
+
+
 
 More at the XinCheJian website wiki.xinchejian.com 
 	- the original Swarmrobot pages at http://wiki.xinchejian.com/wiki/Swarm_robots
