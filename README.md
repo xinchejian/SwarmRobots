@@ -40,7 +40,17 @@ The basic programming is:
 
 Folder structure:
 
-/kicad kicad schematics and PCB design files
+	/kicad 		AtTin2313 - kicad schematics and PCB design files
+	/source		AtTin2313 - source code
+
+	/ATMEGA328	version based on 
+	/UNO		version built onto and existing Arduino UNO.
+
+	Note there is a LARGE amount of direct compatability between the code for ALL versions. Differences to note are:
+		- different IO pins - see "Arduino, AtTiny, L293 and header pin mappings.ods"
+		- size of memory limits size of code
+		- AtTiny versions have fewer IO commands available. See http://wiki.xinchejian.com/wiki/Programming-AFRON
+
 
 More at the XinCheJian website wiki.xinchejian.com 
 	- the original Swarmrobot pages at http://wiki.xinchejian.com/wiki/Swarm_robots
