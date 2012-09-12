@@ -1,0 +1,122 @@
+# EESchema Netlist Version 1.1 created  Tue 11 Sep 2012 10:58:42 PM CST
+(
+ ( /504F3C7D $noname  U1 TSOP1838 {Lib=TSOP1838}
+  (    1 N-000018 )
+  (    2 N-000017 )
+  (    3 N-000005 )
+ )
+ ( /504F4687 $noname  U4 TSOP1838 {Lib=TSOP1838}
+  (    1 N-000016 )
+  (    2 N-000017 )
+  (    3 N-000005 )
+ )
+ ( /504F4696 $noname  U2 TSOP1838 {Lib=TSOP1838}
+  (    1 N-000015 )
+  (    2 N-000017 )
+  (    3 N-000005 )
+ )
+ ( /504F46A5 $noname  U3 TSOP1838 {Lib=TSOP1838}
+  (    1 N-000012 )
+  (    2 N-000017 )
+  (    3 N-000005 )
+ )
+ ( /504F4FA3 $noname  R1 58 {Lib=R}
+  (    1 N-000003 )
+  (    2 N-000004 )
+ )
+ ( /504F500E $noname  Q1 MOSFET_N {Lib=MOSFET_N}
+  (    D N-000002 )
+  (    G N-000006 )
+  (    S N-000001 )
+ )
+ ( /504F5090 $noname  D1 LED {Lib=LED}
+  (    1 N-000003 )
+  (    2 N-000002 )
+ )
+ ( /504F51BC $noname  P1 CONN_2 {Lib=CONN_2}
+  (    1 N-000017 )
+  (    2 N-000005 )
+ )
+ ( /504F51CB $noname  P3 CONN_2 {Lib=CONN_2}
+  (    1 N-000001 )
+  (    2 N-000004 )
+ )
+ ( /504F51DA $noname  P2 CONN_6 {Lib=CONN_6}
+  (    1 ? )
+  (    2 ? )
+  (    3 N-000018 )
+  (    4 N-000015 )
+  (    5 N-000012 )
+  (    6 N-000016 )
+ )
+ ( /504F51E9 $noname  P4 CONN_6 {Lib=CONN_6}
+  (    1 ? )
+  (    2 ? )
+  (    3 ? )
+  (    4 ? )
+  (    5 N-000006 )
+  (    6 ? )
+ )
+)
+*
+{ Allowed footprints by component:
+$component R1
+ R?
+ SM0603
+ SM0805
+ R?-*
+ SM1206
+$endlist
+$component D1
+ LED-3MM
+ LED-5MM
+ LED-10MM
+ LED-0603
+ LED-0805
+ LED-1206
+ LEDV
+$endlist
+$endfootprintlist
+}
+{ Pin List by Nets
+Net 1 "" ""
+ P3 1
+ Q1 S
+Net 2 "" ""
+ D1 2
+ Q1 D
+Net 3 "" ""
+ D1 1
+ R1 1
+Net 4 "" ""
+ P3 2
+ R1 2
+Net 5 "" ""
+ U1 3
+ U4 3
+ U3 3
+ U2 3
+ P1 2
+Net 6 "" ""
+ Q1 G
+ P4 5
+Net 12 "" ""
+ P2 5
+ U3 1
+Net 15 "" ""
+ P2 4
+ U2 1
+Net 16 "" ""
+ U4 1
+ P2 6
+Net 17 "" ""
+ P1 1
+ U3 2
+ U1 2
+ U2 2
+ U4 2
+Net 18 "" ""
+ U1 1
+ P2 3
+}
+#End

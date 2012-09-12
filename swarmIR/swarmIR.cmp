@@ -1,0 +1,80 @@
+Cmp-Mod V01 Created by CvPcb (2011-nov-30)-testing date = Tue 11 Sep 2012 11:12:42 PM CST
+
+BeginCmp
+TimeStamp = /504F5090;
+Reference = D1;
+ValeurCmp = LED;
+IdModule  = LED-5MM;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F51BC;
+Reference = P1;
+ValeurCmp = CONN_2;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F51DA;
+Reference = P2;
+ValeurCmp = CONN_6;
+IdModule  = PIN_ARRAY-6X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F51CB;
+Reference = P3;
+ValeurCmp = CONN_2;
+IdModule  = PIN_ARRAY_2X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F51E9;
+Reference = P4;
+ValeurCmp = CONN_6;
+IdModule  = PIN_ARRAY-6X1;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F500E;
+Reference = Q1;
+ValeurCmp = MOSFET_N;
+IdModule  = TO92DGS;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F4FA3;
+Reference = R1;
+ValeurCmp = 58;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F3C7D;
+Reference = U1;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F4696;
+Reference = U2;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F46A5;
+Reference = U3;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+BeginCmp
+TimeStamp = /504F4687;
+Reference = U4;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+EndListe

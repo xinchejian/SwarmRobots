@@ -1,0 +1,237 @@
+
+(session swarmIR.ses
+  (base_design swarmIR.dsn)
+  (placement
+    (resolution mil 10)
+    (component TSOP1838
+      (place U1 28500 -28000 front 0)
+      (place U4 28500 -17500 front 180)
+      (place U2 23000 -26000 front 315)
+      (place U3 34000 -26000 front 45)
+    )
+    (component TO92DGS
+      (place Q1 29000 -21000 front 225)
+    )
+    (component R3
+      (place R1 27500 -21000 front 90)
+    )
+    (component PIN_ARRAY_2X1
+      (place P1 20000 -24000 front 90)
+      (place P3 37000 -24000 front 90)
+    )
+    (component "PIN_ARRAY-6X1"
+      (place P2 20000 -20000 front 90)
+      (place P4 37000 -20000 front 90)
+    )
+    (component "LED-5MM"
+      (place D1 28500 -25000 front 90)
+    )
+  )
+  (was_is
+  )
+  (routes 
+    (resolution mil 10)
+    (parser
+      (host_cad "KiCad's Pcbnew")
+      (host_version "(2011-nov-30)-testing")
+    )
+    (library_out 
+      (padstack "Via[0-1]_35:635_um"
+        (shape
+          (circle Front 350 0 0)
+        )
+        (shape
+          (circle Back 350 0 0)
+        )
+        (attach off)
+      )
+      (padstack "Via[0-1]_35:0_um"
+        (shape
+          (circle Front 350 0 0)
+        )
+        (shape
+          (circle Back 350 0 0)
+        )
+        (attach off)
+      )
+    )
+    (network_out 
+      (net "N-000001"
+        (wire
+          (path Back 100
+            37000 -24500
+            36547 -24500
+          )
+        )
+        (wire
+          (path Back 100
+            36547 -24500
+            32340 -20293
+            29000 -20293
+          )
+        )
+      )
+      (net "N-000002"
+        (wire
+          (path Back 100
+            29000 -21707
+            28698 -22009
+          )
+        )
+        (wire
+          (path Back 100
+            28500 -24500
+            28698 -24302
+            28698 -22010
+            28698 -22009
+          )
+        )
+      )
+      (net "N-000003"
+        (wire
+          (path Front 100
+            28500 -25500
+            27500 -24500
+            27500 -22500
+          )
+        )
+      )
+      (net "N-000004"
+        (wire
+          (path Front 100
+            37000 -23500
+            31500 -23500
+            27500 -19500
+          )
+        )
+      )
+      (net "N-000005"
+        (wire
+          (path Back 100
+            22327 -25967
+            25610 -22684
+            25610 -19390
+            27500 -17500
+          )
+        )
+        (wire
+          (path Back 100
+            22327 -25967
+            23067 -26707
+            23707 -26707
+          )
+        )
+        (wire
+          (path Back 100
+            20000 -23500
+            20000 -23640
+            22327 -25967
+          )
+        )
+        (wire
+          (path Back 100
+            34707 -25293
+            32207 -25293
+            29500 -28000
+          )
+        )
+        (wire
+          (path Front 100
+            23707 -26707
+            25623 -28623
+            28877 -28623
+            29500 -28000
+          )
+        )
+      )
+      (net "N-000006"
+        (wire
+          (path Front 100
+            37000 -18500
+            32207 -18500
+            29707 -21000
+          )
+        )
+      )
+      (net "N-000012"
+        (wire
+          (path Front 100
+            20000 -18500
+            28207 -26707
+            33293 -26707
+          )
+        )
+      )
+      (net "N-000015"
+        (wire
+          (path Back 100
+            20000 -19500
+            22293 -21793
+            22293 -25293
+          )
+        )
+      )
+      (net "N-000016"
+        (wire
+          (path Front 100
+            20000 -17500
+            20762 -18262
+            28738 -18262
+            29500 -17500
+          )
+        )
+      )
+      (net "N-000017"
+        (wire
+          (path Back 100
+            26500 -26000
+            28500 -28000
+          )
+        )
+        (wire
+          (path Back 100
+            23000 -26000
+            26500 -26000
+          )
+        )
+        (wire
+          (path Back 100
+            28500 -17500
+            26500 -19500
+            26500 -26000
+          )
+        )
+        (wire
+          (path Front 100
+            34000 -26000
+            34000 -26651
+            33320 -27331
+            29169 -27331
+            28500 -28000
+          )
+        )
+        (wire
+          (path Front 100
+            20000 -24500
+            20453 -24500
+          )
+        )
+        (wire
+          (path Front 100
+            20453 -24500
+            21953 -26000
+            23000 -26000
+          )
+        )
+      )
+      (net "N-000018"
+        (wire
+          (path Front 100
+            20000 -20500
+            27500 -28000
+          )
+        )
+      )
+    )
+  )
+)

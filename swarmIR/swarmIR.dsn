@@ -1,0 +1,207 @@
+(pcb /home/edwardrf/git/SwarmRobots/swarmIR/swarmIR.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "(2011-nov-30)-testing")
+  )
+  (resolution mil 10)
+  (unit mil)
+  (structure
+    (layer Front
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer Back
+      (type signal)
+      (property
+        (index 1)
+      )
+    )
+    (boundary
+      (path pcb 0  1950 -2890  1950 -1680  3750 -1680  3750 -2890  1950 -2890)
+    )
+    (via "Via[0-1]_35:635_um" "Via[0-1]_35:0_um")
+    (rule
+      (width 10)
+      (clearance 10.1)
+      (clearance 10.1 (type default_smd))
+      (clearance 2.5 (type smd_smd))
+    )
+  )
+  (placement
+    (component TSOP1838
+      (place U1 2850 -2800 front 0 (PN TSOP1838))
+      (place U4 2850 -1750 front 180 (PN TSOP1838))
+      (place U2 2300 -2600 front 315 (PN TSOP1838))
+      (place U3 3400 -2600 front 45 (PN TSOP1838))
+    )
+    (component TO92DGS
+      (place Q1 2900 -2100 front 225 (PN MOSFET_N))
+    )
+    (component R3
+      (place R1 2750 -2100 front 90 (PN 58))
+    )
+    (component PIN_ARRAY_2X1
+      (place P1 2000 -2400 front 90 (PN CONN_2))
+      (place P3 3700 -2400 front 90 (PN CONN_2))
+    )
+    (component "PIN_ARRAY-6X1"
+      (place P2 2000 -2000 front 90 (PN CONN_6))
+      (place P4 3700 -2000 front 90 (PN CONN_6))
+    )
+    (component "LED-5MM"
+      (place D1 2850 -2500 front 90 (PN LED))
+    )
+  )
+  (library
+    (image TSOP1838
+      (outline (path signal 15  -130 100  -130 -100))
+      (outline (path signal 15  -130 -100  130 -100))
+      (outline (path signal 15  130 -100  130 100))
+      (outline (path signal 15  130 100  -130 100))
+      (pin Round[A]Pad_1524_um 1 -100 0)
+      (pin Round[A]Pad_1524_um 2 0 0)
+      (pin Round[A]Pad_1524_um 3 100 0)
+    )
+    (image TO92DGS
+      (outline (path signal 12  -50 -100  100 50))
+      (outline (path signal 12  100 50  100 100))
+      (outline (path signal 12  100 100  50 150))
+      (outline (path signal 12  50 150  -50 150))
+      (outline (path signal 12  -50 150  -150 50))
+      (outline (path signal 12  -150 50  -150 -50))
+      (outline (path signal 12  -150 -50  -100 -100))
+      (outline (path signal 12  -100 -100  -50 -100))
+      (pin Rect[A]Pad_1397x1397_um D 50 50)
+      (pin Round[A]Pad_1397_um G -50 50)
+      (pin Round[A]Pad_1397_um S -50 -50)
+    )
+    (image R3
+      (outline (path signal 8  -150 0  -130 0))
+      (outline (path signal 8  150 0  130 0))
+      (outline (path signal 8  130 0  130 40))
+      (outline (path signal 8  130 40  -130 40))
+      (outline (path signal 8  -130 40  -130 -40))
+      (outline (path signal 8  -130 -40  130 -40))
+      (outline (path signal 8  130 -40  130 0))
+      (outline (path signal 8  -130 20  -110 40))
+      (pin Round[A]Pad_1397_um 1 -150 0)
+      (pin Round[A]Pad_1397_um 2 150 0)
+    )
+    (image PIN_ARRAY_2X1
+      (outline (path signal 6  -100 -50  -100 50))
+      (outline (path signal 6  -100 50  100 50))
+      (outline (path signal 6  100 50  100 -50))
+      (outline (path signal 6  100 -50  -100 -50))
+      (pin Rect[A]Pad_1524x1524_um 1 -50 0)
+      (pin Round[A]Pad_1524_um 2 50 0)
+    )
+    (image "PIN_ARRAY-6X1"
+      (outline (path signal 12  -300 -50  -300 50))
+      (outline (path signal 12  -300 50  300 50))
+      (outline (path signal 12  300 50  300 -50))
+      (outline (path signal 12  300 -50  -300 -50))
+      (outline (path signal 12  -200 -50  -200 50))
+      (pin Rect[A]Pad_1524x1524_um 1 -250 0)
+      (pin Round[A]Pad_1524_um 2 -150 0)
+      (pin Round[A]Pad_1524_um 3 -50 0)
+      (pin Round[A]Pad_1524_um 4 50 0)
+      (pin Round[A]Pad_1524_um 5 150 0)
+      (pin Round[A]Pad_1524_um 6 250 0)
+    )
+    (image "LED-5MM"
+      (outline (path signal 8  112 -75  112 75))
+      (outline (path signal 3  80.7 0  77.2 -21.8  67.2 -41.5  51.5 -57.2  31.8 -67.2  10 -70.7
+            -11.8 -67.2  -31.5 -57.2  -47.2 -41.5  -57.2 -21.8  -60.7 0
+            -57.2 21.8  -47.2 41.5  -31.5 57.2  -11.8 67.2  10 70.7  31.8 67.2
+            51.5 57.2  67.2 41.5  77.2 21.8))
+      (pin Round[A]Pad_1676.4_um 1 -50 0)
+      (pin Round[A]Pad_1676.4_um 2 50 0)
+    )
+    (padstack Round[A]Pad_1397_um
+      (shape (circle Front 55))
+      (shape (circle Back 55))
+      (attach off)
+    )
+    (padstack Round[A]Pad_1524_um
+      (shape (circle Front 60))
+      (shape (circle Back 60))
+      (attach off)
+    )
+    (padstack Round[A]Pad_1676.4_um
+      (shape (circle Front 66))
+      (shape (circle Back 66))
+      (attach off)
+    )
+    (padstack Rect[A]Pad_1397x1397_um
+      (shape (rect Front -27.5 -27.5 27.5 27.5))
+      (shape (rect Back -27.5 -27.5 27.5 27.5))
+      (attach off)
+    )
+    (padstack Rect[A]Pad_1524x1524_um
+      (shape (rect Front -30 -30 30 30))
+      (shape (rect Back -30 -30 30 30))
+      (attach off)
+    )
+    (padstack "Via[0-1]_35:635_um"
+      (shape (circle Front 35))
+      (shape (circle Back 35))
+      (attach off)
+    )
+    (padstack "Via[0-1]_35:0_um"
+      (shape (circle Front 35))
+      (shape (circle Back 35))
+      (attach off)
+    )
+  )
+  (network
+    (net "N-000001"
+      (pins Q1-S P3-1)
+    )
+    (net "N-000002"
+      (pins Q1-D D1-2)
+    )
+    (net "N-000003"
+      (pins R1-1 D1-1)
+    )
+    (net "N-000004"
+      (pins R1-2 P3-2)
+    )
+    (net "N-000005"
+      (pins U1-3 U4-3 U2-3 U3-3 P1-2)
+    )
+    (net "N-000006"
+      (pins Q1-G P4-5)
+    )
+    (net "N-000012"
+      (pins U3-1 P2-5)
+    )
+    (net "N-000015"
+      (pins U2-1 P2-4)
+    )
+    (net "N-000016"
+      (pins U4-1 P2-6)
+    )
+    (net "N-000017"
+      (pins U1-2 U4-2 U2-2 U3-2 P1-1)
+    )
+    (net "N-000018"
+      (pins U1-1 P2-3)
+    )
+    (class kicad_default "" "N-000001" "N-000002" "N-000003" "N-000004" "N-000005"
+      "N-000006" "N-000012" "N-000015" "N-000016" "N-000017" "N-000018"
+      (circuit
+        (use_via Via[0-1]_35:635_um)
+      )
+      (rule
+        (width 10)
+        (clearance 10.1)
+      )
+    )
+  )
+  (wiring
+  )
+)
