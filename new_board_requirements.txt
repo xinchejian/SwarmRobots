@@ -1,0 +1,10 @@
+New SwarmBot board with Atmega 32u4  >>>>
+
+What do we need?
+
+- voltage monitor by software -> reserve 1 analog input.
+- onboard servo/sensor 3-pin connectors
+- onboard IR receiver
+- ? how to arrange the shield connector pins arrays ?
+- crystal onboard
+- SPI bus pins on one side
