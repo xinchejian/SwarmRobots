@@ -103,7 +103,7 @@ void loop() {
   boolean IR_rear = digitalRead(IR_R);
   
   // Move the SwarmBot in direction of the 'best' IR signal
-  if(IR_front == LOW && ((IR_left || IR_right == LOW) || (IR_left && IR_right) == HIGH)) {
+  if( (IR_front == LOW) && ( 0 == (IR_left ^ IR_right)) ) {
     forward(SPD_FAST);
     delay(100);
   }else if(IR_left == LOW) {
