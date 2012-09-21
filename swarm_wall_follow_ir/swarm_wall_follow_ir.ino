@@ -113,9 +113,11 @@ void loop() {
     if(!(reading & _BV(PD4))) f++;
     if(!(reading & _BV(PD6))) b++;
   }
+  // Show a short light for left and right
   if(l > 5) digitalWrite(LedRx, HIGH); else digitalWrite(LedRx, LOW);
   if(r > 5) digitalWrite(LedTx, HIGH); else digitalWrite(LedTx, LOW);
   delay_us(1000);
+  // Show a long light for front and back
   if(f > 5) digitalWrite(LedRx, HIGH); else digitalWrite(LedRx, LOW);
   if(b > 5) digitalWrite(LedTx, HIGH); else digitalWrite(LedTx, LOW);
   delay_us(8000);
