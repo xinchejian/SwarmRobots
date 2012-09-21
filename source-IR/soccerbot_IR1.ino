@@ -3,24 +3,16 @@
   
   Implements core motor driver functionality and simple InfraRed (IR) chasing.
   
-  
-  Licence??
+  Licence CC by SA
   
   Sofware version              IR1.01  Date:- 2012-08-30
 
   Uses Hardware:-
-    - Motor driver PCB version ???    Date:- 2012-08-??
-    - IR shield version        ???    Date:- 2012-08-??
-*/
-/*
-to do 
-  - naming of atTiny, Ard, Sunny's versions
-  - Shields - name also needs reflect base robot compatability (& version reange!!!!)
-  - ver# schemes
+    - Motor driver PCB version     Date:- 2012-08
+    - IR shield version            Date:- 2012-08
 */
 
 /*
-??how to do LONG notes in Git?????????
   Release notes for this version:
   
   - Added Notes_Tips_ToDO files so the main code looks simpler and is not overwhelming!
@@ -111,7 +103,7 @@ void loop() {
   boolean IR_rear = digitalRead(IR_R);
   
   // Move the SwarmBot in direction of the 'best' IR signal
-  if(IR_front == LOW && ((IR_left || IR_right == LOW) || (IR_left && IR_right) == HIGH)) {
+  if( (IR_front == LOW) && ( 0 == (IR_left ^ IR_right)) ) {
     forward(SPD_FAST);
     delay(100);
   }else if(IR_left == LOW) {
