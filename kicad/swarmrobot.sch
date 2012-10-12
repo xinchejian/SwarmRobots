@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Mon 02 Jul 2012 05:04:04 PM CST
+EESchema Schematic File Version 2  date Fri 12 Oct 2012 19:58:59 CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -29,12 +29,11 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:l293e
 LIBS:attiny
-LIBS:swarmrobot-cache
-EELAYER 25  0
+LIBS:st-microelectronics
+EELAYER 27 0
 EELAYER END
-$Descr A4 11700 8267
+$Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""

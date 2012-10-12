@@ -1,4 +1,18 @@
-Cmp-Mod V01 Created by CvPcb (2011-nov-30)-testing date = Tue 11 Sep 2012 11:12:42 PM CST
+Cmp-Mod V01 Created by CvPcb (2011-nov-30)-testing date = Fri 12 Oct 2012 11:11:44 CST
+
+BeginCmp
+TimeStamp = /507782FA;
+Reference = C1;
+ValeurCmp = 47uF;
+IdModule  = C1V5;
+EndCmp
+
+BeginCmp
+TimeStamp = /50778457;
+Reference = C2;
+ValeurCmp = 47uF;
+IdModule  = C1V5;
+EndCmp
 
 BeginCmp
 TimeStamp = /504F5090;
@@ -46,6 +60,41 @@ BeginCmp
 TimeStamp = /504F4FA3;
 Reference = R1;
 ValeurCmp = 58;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5077853E;
+Reference = R2;
+ValeurCmp = 22kOhm;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5077859F;
+Reference = R3;
+ValeurCmp = 22kOhm;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /507781A3;
+Reference = R4;
+ValeurCmp = 47;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /507785A7;
+Reference = R5;
+ValeurCmp = 22kOhm;
+IdModule  = R3;
+EndCmp
+
+BeginCmp
+TimeStamp = /507785AD;
+Reference = R6;
+ValeurCmp = 22kOhm;
 IdModule  = R3;
 EndCmp
 
