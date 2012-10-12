@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Fri 12 Oct 2012 10:54:18 CST
+EESchema Schematic File Version 2  date Fri 12 Oct 2012 20:27:16 CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -208,12 +208,48 @@ F 1 "22kOhm" V 3500 4250 50  0000 C CNN
 	1    3500 4250
 	-1   0    0    1   
 $EndComp
+$Comp
+L CONN_2 P7
+U 1 1 50780889
+P 8550 3200
+F 0 "P7" V 8500 3200 40  0000 C CNN
+F 1 "CONN_2" V 8600 3200 40  0000 C CNN
+	1    8550 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_2 P5
+U 1 1 50780898
+P 1850 3200
+F 0 "P5" V 1800 3200 40  0000 C CNN
+F 1 "CONN_2" V 1900 3200 40  0000 C CNN
+	1    1850 3200
+	-1   0    0    -1  
+$EndComp
+$Comp
+L CONN_6 P8
+U 1 1 507808BB
+P 8550 3650
+F 0 "P8" V 8500 3650 60  0000 C CNN
+F 1 "CONN_6" V 8600 3650 60  0000 C CNN
+	1    8550 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_6 P6
+U 1 1 507808CA
+P 1850 3650
+F 0 "P6" V 1800 3650 60  0000 C CNN
+F 1 "CONN_6" V 1900 3650 60  0000 C CNN
+	1    1850 3650
+	-1   0    0    -1  
+$EndComp
 Connection ~ 5850 3250
 Connection ~ 5850 4150
 Wire Wire Line
 	5100 2850 4000 2850
 Wire Wire Line
-	4000 2850 4000 5550
+	4000 1700 4000 6600
 Wire Wire Line
 	3550 3300 4000 3300
 Wire Wire Line
@@ -235,31 +271,31 @@ Connection ~ 5850 2350
 Wire Wire Line
 	3800 2350 3800 3600
 Wire Wire Line
-	3800 3600 2850 3600
+	3800 3600 2200 3600
 Wire Wire Line
-	2850 3700 4300 3700
+	2200 3700 4300 3700
 Wire Wire Line
 	4300 3800 4300 4150
 Wire Wire Line
-	2850 3800 4300 3800
+	2200 3800 4300 3800
 Wire Wire Line
 	3850 5050 3850 3900
 Wire Wire Line
-	3850 3900 2850 3900
+	3850 3900 2200 3900
 Wire Wire Line
-	7500 3800 6700 3800
+	6700 3800 8200 3800
 Wire Wire Line
 	6400 3100 6400 3600
 Wire Wire Line
-	6400 3100 7500 3100
+	6400 3100 8200 3100
 Wire Wire Line
-	5850 1850 5850 5050
+	5850 1200 5850 6100
 Wire Wire Line
 	5850 1850 2850 1850
 Wire Wire Line
 	2850 1850 2850 3100
 Wire Wire Line
-	3050 3300 2850 3300
+	2200 3300 3050 3300
 Wire Wire Line
 	3400 2850 3650 2850
 Wire Wire Line
@@ -269,7 +305,7 @@ Wire Wire Line
 	3000 2850 2850 2850
 Connection ~ 2850 2850
 Wire Wire Line
-	7500 3300 7300 3300
+	7300 3300 8200 3300
 Wire Wire Line
 	7300 3300 7300 3900
 Wire Wire Line
@@ -287,7 +323,7 @@ Wire Wire Line
 	6950 4300 6950 4450
 Connection ~ 6950 4450
 Wire Wire Line
-	2950 4500 3500 4500
+	2950 4500 3650 4500
 Connection ~ 3350 4500
 Connection ~ 3200 4500
 Wire Wire Line
@@ -306,4 +342,91 @@ Connection ~ 3350 3700
 Wire Wire Line
 	3500 4000 3500 3600
 Connection ~ 3500 3600
+Connection ~ 7500 3100
+Connection ~ 7500 3300
+Wire Wire Line
+	7500 3400 8200 3400
+Wire Wire Line
+	8200 3500 7500 3500
+Wire Wire Line
+	7500 3600 8200 3600
+Wire Wire Line
+	8200 3700 7500 3700
+Connection ~ 7500 3800
+Wire Wire Line
+	8200 3900 7500 3900
+Connection ~ 2850 3900
+Connection ~ 2850 3800
+Connection ~ 2850 3700
+Connection ~ 2850 3600
+Wire Wire Line
+	2200 3500 2850 3500
+Wire Wire Line
+	2200 3400 3750 3400
+Connection ~ 2850 3300
+Wire Wire Line
+	2850 3100 2200 3100
+$Comp
+L TSOP1838 IR_R
+U 1 1 50780B0D
+P 5100 1200
+F 0 "IR_R" H 5100 1200 60  0000 C CNN
+F 1 "TSOP1838" H 5050 1300 60  0000 C CNN
+	1    5100 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L TSOP1838 IR_L
+U 1 1 50780B13
+P 5100 6100
+F 0 "IR_L" H 5100 6100 60  0000 C CNN
+F 1 "TSOP1838" H 5050 6200 60  0000 C CNN
+	1    5100 6100
+	1    0    0    -1  
+$EndComp
+Connection ~ 5850 1850
+Wire Wire Line
+	5100 1700 4000 1700
+Connection ~ 4000 2850
+Connection ~ 5850 5050
+Wire Wire Line
+	4000 6600 5100 6600
+Connection ~ 4000 5550
+Wire Wire Line
+	7500 3900 7500 6750
+Wire Wire Line
+	7500 6750 4300 6750
+Wire Wire Line
+	4300 6750 4300 6100
+$Comp
+L R R?
+U 1 1 50780DF4
+P 3500 4750
+F 0 "R?" V 3580 4750 50  0000 C CNN
+F 1 "22kOhm" V 3500 4750 50  0000 C CNN
+	1    3500 4750
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3500 5000 3500 6100
+Wire Wire Line
+	3500 6100 4300 6100
+$Comp
+L R R?
+U 1 1 50780EA2
+P 3650 4250
+F 0 "R?" V 3730 4250 50  0000 C CNN
+F 1 "22kOhm" V 3650 4250 50  0000 C CNN
+	1    3650 4250
+	-1   0    0    1   
+$EndComp
+Connection ~ 3500 4500
+Wire Wire Line
+	4300 1200 3750 1200
+Wire Wire Line
+	3750 1200 3750 3400
+Connection ~ 2850 3400
+Wire Wire Line
+	3650 4000 3650 3400
+Connection ~ 3650 3400
 $EndSCHEMATC
