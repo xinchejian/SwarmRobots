@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Thu 28 Jun 2012 03:59:55 PM CST
+EESchema Schematic File Version 2  date Mon 02 Jul 2012 05:04:04 PM CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -47,7 +47,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Wire Line
-	9900 2700 9650 2700
+	9650 2700 9900 2700
 Wire Wire Line
 	9900 2700 9900 3200
 Wire Wire Line
