@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Tue 11 Sep 2012 10:54:28 PM CST
+EESchema Schematic File Version 2  date Tue 11 Sep 2012 10:58:22 PM CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -82,24 +82,6 @@ F 1 "TSOP1838" H 5050 4250 60  0000 C CNN
 	1    5100 4150
 	1    0    0    -1  
 $EndComp
-$Comp
-L CONN_8 P1
-U 1 1 504F46EA
-P 3250 3550
-F 0 "P1" V 3200 3550 60  0000 C CNN
-F 1 "CONN_8" V 3300 3550 60  0000 C CNN
-	1    3250 3550
-	-1   0    0    -1  
-$EndComp
-$Comp
-L CONN_8 P2
-U 1 1 504F46F9
-P 7850 3550
-F 0 "P2" V 7800 3550 60  0000 C CNN
-F 1 "CONN_8" V 7900 3550 60  0000 C CNN
-	1    7850 3550
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	5850 1900 5850 5050
 Connection ~ 5850 3250
@@ -127,8 +109,6 @@ Wire Wire Line
 	4300 5050 3850 5050
 Wire Wire Line
 	5850 1900 3600 1900
-Wire Wire Line
-	3600 1900 3600 3200
 Connection ~ 5850 2350
 Wire Wire Line
 	3800 2350 3800 3600
@@ -167,9 +147,7 @@ $EndComp
 Wire Wire Line
 	7500 3800 6700 3800
 Wire Wire Line
-	6400 3600 6400 3200
-Wire Wire Line
-	6400 3200 7500 3200
+	6400 3100 6400 3600
 $Comp
 L LED D1
 U 1 1 504F5090
@@ -189,4 +167,44 @@ Wire Wire Line
 	6450 4300 6400 4300
 Wire Wire Line
 	6400 4300 6400 4000
+$Comp
+L CONN_2 P?
+U 1 1 504F51BC
+P 3250 3200
+F 0 "P?" V 3200 3200 40  0000 C CNN
+F 1 "CONN_2" V 3300 3200 40  0000 C CNN
+	1    3250 3200
+	-1   0    0    -1  
+$EndComp
+$Comp
+L CONN_2 P?
+U 1 1 504F51CB
+P 7850 3200
+F 0 "P?" V 7800 3200 40  0000 C CNN
+F 1 "CONN_2" V 7900 3200 40  0000 C CNN
+	1    7850 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_6 P?
+U 1 1 504F51DA
+P 3250 3650
+F 0 "P?" V 3200 3650 60  0000 C CNN
+F 1 "CONN_6" V 3300 3650 60  0000 C CNN
+	1    3250 3650
+	-1   0    0    -1  
+$EndComp
+$Comp
+L CONN_6 P?
+U 1 1 504F51E9
+P 7850 3650
+F 0 "P?" V 7800 3650 60  0000 C CNN
+F 1 "CONN_6" V 7900 3650 60  0000 C CNN
+	1    7850 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3600 1900 3600 3100
+Wire Wire Line
+	6400 3100 7500 3100
 $EndSCHEMATC

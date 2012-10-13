@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Tue 11 Sep 2012 10:58:22 PM CST
+EESchema Schematic File Version 2  date Wed 12 Sep 2012 11:22:29 PM CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -168,37 +168,37 @@ Wire Wire Line
 Wire Wire Line
 	6400 4300 6400 4000
 $Comp
-L CONN_2 P?
+L CONN_2 P1
 U 1 1 504F51BC
 P 3250 3200
-F 0 "P?" V 3200 3200 40  0000 C CNN
+F 0 "P1" V 3200 3200 40  0000 C CNN
 F 1 "CONN_2" V 3300 3200 40  0000 C CNN
 	1    3250 3200
 	-1   0    0    -1  
 $EndComp
 $Comp
-L CONN_2 P?
+L CONN_2 P3
 U 1 1 504F51CB
 P 7850 3200
-F 0 "P?" V 7800 3200 40  0000 C CNN
+F 0 "P3" V 7800 3200 40  0000 C CNN
 F 1 "CONN_2" V 7900 3200 40  0000 C CNN
 	1    7850 3200
 	1    0    0    -1  
 $EndComp
 $Comp
-L CONN_6 P?
+L CONN_6 P2
 U 1 1 504F51DA
 P 3250 3650
-F 0 "P?" V 3200 3650 60  0000 C CNN
+F 0 "P2" V 3200 3650 60  0000 C CNN
 F 1 "CONN_6" V 3300 3650 60  0000 C CNN
 	1    3250 3650
 	-1   0    0    -1  
 $EndComp
 $Comp
-L CONN_6 P?
+L CONN_6 P4
 U 1 1 504F51E9
 P 7850 3650
-F 0 "P?" V 7800 3650 60  0000 C CNN
+F 0 "P4" V 7800 3650 60  0000 C CNN
 F 1 "CONN_6" V 7900 3650 60  0000 C CNN
 	1    7850 3650
 	1    0    0    -1  

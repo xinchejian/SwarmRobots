@@ -63,6 +63,7 @@ void setup() {
   // SETUP pin modes for te PWM pin
   DDRB = DDRB | (1 << PB4);
   
+  stopNow();
 }
 
 void delay_us(uint16_t us) {
@@ -103,6 +104,7 @@ uint8_t pulse(uint16_t ontime, uint16_t offtime){
   return reading;
 }
 
+byte wallSide = 0;
 
 void loop() {
   uint8_t l = 0, r = 0, f = 0, b = 0;
@@ -113,15 +115,32 @@ void loop() {
     if(!(reading & _BV(PD4))) f++;
     if(!(reading & _BV(PD6))) b++;
   }
-  // Show a short light for left and right
-  if(l > 5) digitalWrite(LedRx, HIGH); else digitalWrite(LedRx, LOW);
-  if(r > 5) digitalWrite(LedTx, HIGH); else digitalWrite(LedTx, LOW);
-  delay_us(1000);
-  // Show a long light for front and back
-  if(f > 5) digitalWrite(LedRx, HIGH); else digitalWrite(LedRx, LOW);
-  if(b > 5) digitalWrite(LedTx, HIGH); else digitalWrite(LedTx, LOW);
-  delay_us(8000);
-  stopNow();
+  
+  // If there is a blockage
+  if(f > 5){
+    backward(255);
+    delay_us(10000);
+    if(l > 5 && r < 5){
+      turnRight(255);
+    }else if(r > 5 && l < 5){
+      turnLeft(255);
+    }else if(l < 5 && r < 5){
+      if(wallSide == 0) turnLeft(255); else turnRight(255);
+    }
+    delay_us(100000);
+  }else if(l > 5){
+    wallSide = 0;
+    turnRight(255);
+    delay_us(10000);
+    softLeft();
+  }else if(r > 5){
+    wallSide = 1;
+    turnLeft(255);
+    delay_us(10000);
+    softRight();
+  }else {
+    delay_us(9000);
+  }
 }
 
 
@@ -154,6 +173,26 @@ void backward(int speed){
 
   analogWrite(M_REn, speed);    // PWM pin
   analogWrite(M_LEn, speed);    // PWM pin
+}
+
+void softLeft(){
+  digitalWrite(M_LB, 0);
+  digitalWrite(M_LF, HIGH);
+  digitalWrite(M_RB, 0);
+  digitalWrite(M_RF, HIGH);
+
+  analogWrite(M_REn, 150);    // PWM pin
+  analogWrite(M_LEn, 255);    // PWM pin
+}
+
+void softRight(){
+  digitalWrite(M_LB, 0);
+  digitalWrite(M_LF, HIGH);
+  digitalWrite(M_RB, 0);
+  digitalWrite(M_RF, HIGH);
+
+  analogWrite(M_REn, 150);    // PWM pin
+  analogWrite(M_LEn, 255);    // PWM pin
 }
 
 void turnLeft(int speed){
