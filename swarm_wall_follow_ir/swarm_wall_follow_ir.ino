@@ -1,15 +1,16 @@
-//#define MOTORS           // comment out this define for testing without motors!
+#define MOTORS           // comment out this define for testing without motors!
 
 #define RECEIVED_IR_THRESHOLD 5     // Transmitter sends 15 pulses, this count used to decide
                                     // how many of these pulses received = object found!
 
 #define NOP __asm__ __volatile__ ("nop")
 #define DELAY_CNT 11
+#define DELAY_AVOID 100000
 
-#define M_LF 2               // Motor Left Front
-#define M_LB 3               // Motor Left Back
-#define M_RF 4               // Motor Right Front
-#define M_RB 5               // Motor Right Back
+#define M_LF 3               // Motor Left Front
+#define M_LB 2               // Motor Left Back
+#define M_RF 5               // Motor Right Front
+#define M_RB 4               // Motor Right Back
 
 #define M_REn 7              // Motor Right Enable
 #define M_LEn 11             // Motor Left Enable
@@ -132,17 +133,28 @@ void loop() {
 
 
 #ifdef MOTORS
-  // Simple logic. If object in front - GoForwards, if no object left ....
-  if(f < RECEIVED_IR_THRESHOLD) {
-    forward(SPD_FAST);
-  }else if(l < RECEIVED_IR_THRESHOLD) {
-    turnLeft(SPD_FAST);
-  }else if(r < RECEIVED_IR_THRESHOLD) {
-    turnRight(SPD_FAST);
-  }else if(b < RECEIVED_IR_THRESHOLD) {
+  // Simple logic. If object in front - GoBackwards, if no object left ....
+  if(f > RECEIVED_IR_THRESHOLD) {
     backward(SPD_FAST);
+    delay_us(DELAY_AVOID);
+    if(l > RECEIVED_IR_THRESHOLD)
+        turnRight(SPD_FAST);
+    else if(r > RECEIVED_IR_THRESHOLD)
+        turnLeft(SPD_FAST);
+    delay_us(DELAY_AVOID);
+  }else if(l > RECEIVED_IR_THRESHOLD) {
+    turnRight(SPD_FAST);
+    delay_us(DELAY_AVOID);
+  }else if(r > RECEIVED_IR_THRESHOLD) {
+    turnLeft(SPD_FAST);
+    delay_us(DELAY_AVOID);
+  }else if(b > RECEIVED_IR_THRESHOLD) {
+    forward(SPD_FAST);
+    delay_us(DELAY_AVOID);
   }else {
-    stopNow();
+    forward(SPD_FAST);  // default action if no object detected!
+    delay_us(8000);
+    //stopNow();
   }
 #endif
 
@@ -154,8 +166,10 @@ void loop() {
   // Show a long light for front and back
   if(f > RECEIVED_IR_THRESHOLD) digitalWrite(LedRx, HIGH); else digitalWrite(LedRx, LOW);
   if(b > RECEIVED_IR_THRESHOLD) digitalWrite(LedTx, HIGH); else digitalWrite(LedTx, LOW);
-  delay_us(8000);
-  stopNow();
+
+  // these two steps moved into motor control
+  //delay_us(8000);
+  //stopNow();
 
 }
 
