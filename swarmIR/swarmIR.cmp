@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2011-nov-30)-testing date = Fri 12 Oct 2012 20:41:15 CST
+Cmp-Mod V01 Created by CvPcb (2011-nov-30)-testing date = Wed 17 Oct 2012 08:41:33 PM CST
 
 BeginCmp
 TimeStamp = /507782FA;
@@ -22,17 +22,31 @@ IdModule  = LED-5MM;
 EndCmp
 
 BeginCmp
-TimeStamp = /50780B13;
-Reference = IR_L1;
-ValeurCmp = TSOP1838;
-IdModule  = TSOP1838;
+TimeStamp = /507EA76D;
+Reference = D2;
+ValeurCmp = LED;
+IdModule  = LED-0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /50780B0D;
-Reference = IR_R1;
-ValeurCmp = TSOP1838;
-IdModule  = TSOP1838;
+TimeStamp = /507EA77C;
+Reference = D3;
+ValeurCmp = LED;
+IdModule  = LED-0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /507EA78B;
+Reference = D4;
+ValeurCmp = LED;
+IdModule  = LED-0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /507EA79A;
+Reference = D5;
+ValeurCmp = LED;
+IdModule  = LED-0805;
 EndCmp
 
 BeginCmp
@@ -141,17 +155,31 @@ IdModule  = R1;
 EndCmp
 
 BeginCmp
-TimeStamp = /50780DF4;
+TimeStamp = /507EA6FD;
 Reference = R7;
-ValeurCmp = 22kOhm;
-IdModule  = R1;
+ValeurCmp = R;
+IdModule  = SM0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /50780EA2;
+TimeStamp = /507EA70C;
 Reference = R8;
-ValeurCmp = 22kOhm;
-IdModule  = R1;
+ValeurCmp = R;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /507EA71B;
+Reference = R9;
+ValeurCmp = R;
+IdModule  = SM0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /507EA72A;
+Reference = R10;
+ValeurCmp = R;
+IdModule  = SM0805;
 EndCmp
 
 BeginCmp
@@ -178,6 +206,20 @@ EndCmp
 BeginCmp
 TimeStamp = /504F4687;
 Reference = U4;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+BeginCmp
+TimeStamp = /507E98D3;
+Reference = U5;
+ValeurCmp = TSOP1838;
+IdModule  = TSOP1838;
+EndCmp
+
+BeginCmp
+TimeStamp = /507E98CD;
+Reference = U6;
 ValeurCmp = TSOP1838;
 IdModule  = TSOP1838;
 EndCmp

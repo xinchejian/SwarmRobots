@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Tue 11 Sep 2012 10:58:22 PM CST
+EESchema Schematic File Version 2  date Thu 18 Oct 2012 12:26:04 AM CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -32,13 +32,13 @@ LIBS:valves
 LIBS:tsop1838
 LIBS:atmega32u4
 LIBS:swarmIR-cache
-EELAYER 27 0
+EELAYER 25  0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "12 oct 2012"
+Date "17 oct 2012"
 Rev ""
 Comp ""
 Comment1 ""
@@ -82,10 +82,6 @@ F 1 "TSOP1838" H 5050 4250 60  0000 C CNN
 	1    5100 4150
 	1    0    0    -1  
 $EndComp
-<<<<<<< HEAD
-Wire Wire Line
-	5850 1900 5850 5050
-=======
 $Comp
 L R R1
 U 1 1 504F4FA3
@@ -248,7 +244,6 @@ F 1 "CONN_6" V 1900 3650 60  0000 C CNN
 	1    1850 3650
 	-1   0    0    -1  
 $EndComp
->>>>>>> 92e1ece4fc9550c9ad0c1962d4437bc499a187a3
 Connection ~ 5850 3250
 Connection ~ 5850 4150
 Wire Wire Line
@@ -263,29 +258,20 @@ Connection ~ 4000 3300
 Wire Wire Line
 	4000 4650 5100 4650
 Connection ~ 4000 3750
-Wire Wire Line
-	4000 5550 5100 5550
 Connection ~ 4000 4650
 Wire Wire Line
 	4300 2350 3800 2350
 Wire Wire Line
-	4300 3700 4300 3250
+	4300 1200 4300 3700
 Wire Wire Line
 	4300 5050 3850 5050
-<<<<<<< HEAD
-Wire Wire Line
-	5850 1900 3600 1900
-=======
->>>>>>> 92e1ece4fc9550c9ad0c1962d4437bc499a187a3
 Connection ~ 5850 2350
 Wire Wire Line
 	3800 2350 3800 3600
 Wire Wire Line
 	3800 3600 2200 3600
 Wire Wire Line
-	2200 3700 4300 3700
-Wire Wire Line
-	4300 3800 4300 4150
+	4300 3700 2200 3700
 Wire Wire Line
 	2200 3800 4300 3800
 Wire Wire Line
@@ -298,8 +284,6 @@ Wire Wire Line
 	6400 3100 6400 3600
 Wire Wire Line
 	6400 3100 8200 3100
-Wire Wire Line
-	5850 1200 5850 6100
 Wire Wire Line
 	5850 1850 2850 1850
 Wire Wire Line
@@ -337,7 +321,7 @@ Wire Wire Line
 Connection ~ 3350 4500
 Connection ~ 3200 4500
 Wire Wire Line
-	2950 4500 2950 3300
+	2950 3300 2950 5900
 Connection ~ 2950 3300
 Connection ~ 3050 4500
 Wire Wire Line
@@ -371,120 +355,154 @@ Connection ~ 2850 3700
 Connection ~ 2850 3600
 Wire Wire Line
 	2200 3500 2850 3500
-Wire Wire Line
-	2200 3400 3750 3400
 Connection ~ 2850 3300
 Wire Wire Line
 	2850 3100 2200 3100
 $Comp
-L TSOP1838 IR_R
-U 1 1 50780B0D
-P 5100 1200
-F 0 "IR_R" H 5100 1200 60  0000 C CNN
-F 1 "TSOP1838" H 5050 1300 60  0000 C CNN
-	1    5100 1200
-	1    0    0    -1  
-$EndComp
-$Comp
-L TSOP1838 IR_L
-U 1 1 50780B13
+L TSOP1838 U6
+U 1 1 507E98CD
 P 5100 6100
-F 0 "IR_L" H 5100 6100 60  0000 C CNN
+F 0 "U6" H 5100 6100 60  0000 C CNN
 F 1 "TSOP1838" H 5050 6200 60  0000 C CNN
 	1    5100 6100
 	1    0    0    -1  
 $EndComp
-Connection ~ 5850 1850
+$Comp
+L TSOP1838 U5
+U 1 1 507E98D3
+P 5100 1200
+F 0 "U5" H 5100 1200 60  0000 C CNN
+F 1 "TSOP1838" H 5050 1300 60  0000 C CNN
+	1    5100 1200
+	1    0    0    -1  
+$EndComp
+Connection ~ 4300 4150
+Connection ~ 4300 3250
 Wire Wire Line
-	5100 1700 4000 1700
-Connection ~ 4000 2850
+	4000 1700 5100 1700
+Wire Wire Line
+	2950 5900 3650 5900
+Connection ~ 2950 4500
+$Comp
+L R R7
+U 1 1 507EA6FD
+P 3100 4950
+F 0 "R7" V 3180 4950 50  0000 C CNN
+F 1 "R" V 3100 4950 50  0000 C CNN
+	1    3100 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R8
+U 1 1 507EA70C
+P 3250 4950
+F 0 "R8" V 3330 4950 50  0000 C CNN
+F 1 "R" V 3250 4950 50  0000 C CNN
+	1    3250 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R9
+U 1 1 507EA71B
+P 3400 4950
+F 0 "R9" V 3480 4950 50  0000 C CNN
+F 1 "R" V 3400 4950 50  0000 C CNN
+	1    3400 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R10
+U 1 1 507EA72A
+P 3550 4950
+F 0 "R10" V 3630 4950 50  0000 C CNN
+F 1 "R" V 3550 4950 50  0000 C CNN
+	1    3550 4950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3100 4700 3100 3900
+Connection ~ 3100 3900
+Wire Wire Line
+	3250 4700 3250 3800
+Connection ~ 3250 3800
+Wire Wire Line
+	3400 4700 3400 3700
+Connection ~ 3400 3700
+Wire Wire Line
+	3550 4700 3550 3600
+Connection ~ 3550 3600
+$Comp
+L LED D2
+U 1 1 507EA76D
+P 3100 5550
+F 0 "D2" H 3100 5650 50  0000 C CNN
+F 1 "LED" H 3100 5450 50  0000 C CNN
+	1    3100 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D3
+U 1 1 507EA77C
+P 3250 5550
+F 0 "D3" H 3250 5650 50  0000 C CNN
+F 1 "LED" H 3250 5450 50  0000 C CNN
+	1    3250 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D4
+U 1 1 507EA78B
+P 3400 5550
+F 0 "D4" H 3400 5650 50  0000 C CNN
+F 1 "LED" H 3400 5450 50  0000 C CNN
+	1    3400 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D5
+U 1 1 507EA79A
+P 3550 5550
+F 0 "D5" H 3550 5650 50  0000 C CNN
+F 1 "LED" H 3550 5450 50  0000 C CNN
+	1    3550 5550
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3100 5350 3100 5200
+Wire Wire Line
+	3250 5200 3250 5350
+Wire Wire Line
+	3400 5350 3400 5200
+Wire Wire Line
+	3550 5200 3550 5350
+Wire Wire Line
+	3550 5750 3550 5900
+Connection ~ 3550 5900
+Wire Wire Line
+	3400 5750 3400 5900
+Connection ~ 3400 5900
+Wire Wire Line
+	3250 5750 3250 5900
+Connection ~ 3250 5900
+Wire Wire Line
+	3100 5750 3100 5900
+Connection ~ 3100 5900
+Wire Wire Line
+	4300 3800 4300 6100
 Connection ~ 5850 5050
 Wire Wire Line
-	4000 6600 5100 6600
+	5100 5550 4000 5550
 Connection ~ 4000 5550
 Wire Wire Line
-<<<<<<< HEAD
-	6400 3100 6400 3600
-=======
-	7500 3900 7500 6750
+	4000 6600 5100 6600
+Connection ~ 5100 6600
 Wire Wire Line
-	7500 6750 4300 6750
+	5850 1200 5850 6100
+Connection ~ 5850 1850
+Connection ~ 4300 2350
+Connection ~ 4300 5050
+Connection ~ 4000 2850
 Wire Wire Line
-	4300 6750 4300 6100
->>>>>>> 92e1ece4fc9550c9ad0c1962d4437bc499a187a3
-$Comp
-L R R?
-U 1 1 50780DF4
-P 3500 4750
-F 0 "R?" V 3580 4750 50  0000 C CNN
-F 1 "22kOhm" V 3500 4750 50  0000 C CNN
-	1    3500 4750
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	3500 5000 3500 6100
-Wire Wire Line
-	3500 6100 4300 6100
-$Comp
-L R R?
-U 1 1 50780EA2
-P 3650 4250
-F 0 "R?" V 3730 4250 50  0000 C CNN
-F 1 "22kOhm" V 3650 4250 50  0000 C CNN
-	1    3650 4250
-	-1   0    0    1   
-$EndComp
+	2200 3400 2850 3400
 Connection ~ 3500 4500
-Wire Wire Line
-	4300 1200 3750 1200
-Wire Wire Line
-	3750 1200 3750 3400
-Connection ~ 2850 3400
-Wire Wire Line
-<<<<<<< HEAD
-	6400 4300 6400 4000
-$Comp
-L CONN_2 P?
-U 1 1 504F51BC
-P 3250 3200
-F 0 "P?" V 3200 3200 40  0000 C CNN
-F 1 "CONN_2" V 3300 3200 40  0000 C CNN
-	1    3250 3200
-	-1   0    0    -1  
-$EndComp
-$Comp
-L CONN_2 P?
-U 1 1 504F51CB
-P 7850 3200
-F 0 "P?" V 7800 3200 40  0000 C CNN
-F 1 "CONN_2" V 7900 3200 40  0000 C CNN
-	1    7850 3200
-	1    0    0    -1  
-$EndComp
-$Comp
-L CONN_6 P?
-U 1 1 504F51DA
-P 3250 3650
-F 0 "P?" V 3200 3650 60  0000 C CNN
-F 1 "CONN_6" V 3300 3650 60  0000 C CNN
-	1    3250 3650
-	-1   0    0    -1  
-$EndComp
-$Comp
-L CONN_6 P?
-U 1 1 504F51E9
-P 7850 3650
-F 0 "P?" V 7800 3650 60  0000 C CNN
-F 1 "CONN_6" V 7900 3650 60  0000 C CNN
-	1    7850 3650
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3600 1900 3600 3100
-Wire Wire Line
-	6400 3100 7500 3100
-=======
-	3650 4000 3650 3400
-Connection ~ 3650 3400
->>>>>>> 92e1ece4fc9550c9ad0c1962d4437bc499a187a3
 $EndSCHEMATC
