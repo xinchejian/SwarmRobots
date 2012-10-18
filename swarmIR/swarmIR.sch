@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Thu 18 Oct 2012 12:49:41 AM CST
+EESchema Schematic File Version 2  date Thu 18 Oct 2012 08:24:53 CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -32,13 +32,13 @@ LIBS:valves
 LIBS:tsop1838
 LIBS:atmega32u4
 LIBS:swarmIR-cache
-EELAYER 25  0
+EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "17 oct 2012"
+Date "18 oct 2012"
 Rev ""
 Comp ""
 Comment1 ""
@@ -406,8 +406,6 @@ Connection ~ 6950 3100
 Wire Wire Line
 	6950 4300 6950 4450
 Connection ~ 6950 4450
-Wire Wire Line
-	2950 4500 3650 4500
 Connection ~ 3350 4500
 Connection ~ 3200 4500
 Wire Wire Line
@@ -502,4 +500,8 @@ Connection ~ 5850 1850
 Connection ~ 4300 2350
 Connection ~ 4300 5050
 Connection ~ 4000 2850
+NoConn ~ 2200 3400
+NoConn ~ 2850 3400
+Wire Wire Line
+	2950 4500 3500 4500
 $EndSCHEMATC

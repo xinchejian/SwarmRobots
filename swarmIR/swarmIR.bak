@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Thu 18 Oct 2012 12:26:04 AM CST
+EESchema Schematic File Version 2  date Thu 18 Oct 2012 08:24:50 CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -32,13 +32,13 @@ LIBS:valves
 LIBS:tsop1838
 LIBS:atmega32u4
 LIBS:swarmIR-cache
-EELAYER 25  0
+EELAYER 27 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "17 oct 2012"
+Date "18 oct 2012"
 Rev ""
 Comp ""
 Comment1 ""
@@ -244,6 +244,96 @@ F 1 "CONN_6" V 1900 3650 60  0000 C CNN
 	1    1850 3650
 	-1   0    0    -1  
 $EndComp
+$Comp
+L TSOP1838 U6
+U 1 1 507E98CD
+P 5100 6100
+F 0 "U6" H 5100 6100 60  0000 C CNN
+F 1 "TSOP1838" H 5050 6200 60  0000 C CNN
+	1    5100 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L TSOP1838 U5
+U 1 1 507E98D3
+P 5100 1200
+F 0 "U5" H 5100 1200 60  0000 C CNN
+F 1 "TSOP1838" H 5050 1300 60  0000 C CNN
+	1    5100 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R7
+U 1 1 507EA6FD
+P 3100 4950
+F 0 "R7" V 3180 4950 50  0000 C CNN
+F 1 "R" V 3100 4950 50  0000 C CNN
+	1    3100 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R8
+U 1 1 507EA70C
+P 3250 4950
+F 0 "R8" V 3330 4950 50  0000 C CNN
+F 1 "R" V 3250 4950 50  0000 C CNN
+	1    3250 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R9
+U 1 1 507EA71B
+P 3400 4950
+F 0 "R9" V 3480 4950 50  0000 C CNN
+F 1 "R" V 3400 4950 50  0000 C CNN
+	1    3400 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R10
+U 1 1 507EA72A
+P 3550 4950
+F 0 "R10" V 3630 4950 50  0000 C CNN
+F 1 "R" V 3550 4950 50  0000 C CNN
+	1    3550 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L LED D2
+U 1 1 507EA76D
+P 3100 5550
+F 0 "D2" H 3100 5650 50  0000 C CNN
+F 1 "LED" H 3100 5450 50  0000 C CNN
+	1    3100 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D3
+U 1 1 507EA77C
+P 3250 5550
+F 0 "D3" H 3250 5650 50  0000 C CNN
+F 1 "LED" H 3250 5450 50  0000 C CNN
+	1    3250 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D4
+U 1 1 507EA78B
+P 3400 5550
+F 0 "D4" H 3400 5650 50  0000 C CNN
+F 1 "LED" H 3400 5450 50  0000 C CNN
+	1    3400 5550
+	0    -1   -1   0   
+$EndComp
+$Comp
+L LED D5
+U 1 1 507EA79A
+P 3550 5550
+F 0 "D5" H 3550 5650 50  0000 C CNN
+F 1 "LED" H 3550 5450 50  0000 C CNN
+	1    3550 5550
+	0    -1   -1   0   
+$EndComp
 Connection ~ 5850 3250
 Connection ~ 5850 4150
 Wire Wire Line
@@ -316,8 +406,6 @@ Connection ~ 6950 3100
 Wire Wire Line
 	6950 4300 6950 4450
 Connection ~ 6950 4450
-Wire Wire Line
-	2950 4500 3650 4500
 Connection ~ 3350 4500
 Connection ~ 3200 4500
 Wire Wire Line
@@ -358,24 +446,6 @@ Wire Wire Line
 Connection ~ 2850 3300
 Wire Wire Line
 	2850 3100 2200 3100
-$Comp
-L TSOP1838 U6
-U 1 1 507E98CD
-P 5100 6100
-F 0 "U6" H 5100 6100 60  0000 C CNN
-F 1 "TSOP1838" H 5050 6200 60  0000 C CNN
-	1    5100 6100
-	1    0    0    -1  
-$EndComp
-$Comp
-L TSOP1838 U5
-U 1 1 507E98D3
-P 5100 1200
-F 0 "U5" H 5100 1200 60  0000 C CNN
-F 1 "TSOP1838" H 5050 1300 60  0000 C CNN
-	1    5100 1200
-	1    0    0    -1  
-$EndComp
 Connection ~ 4300 4150
 Connection ~ 4300 3250
 Wire Wire Line
@@ -383,42 +453,6 @@ Wire Wire Line
 Wire Wire Line
 	2950 5900 3650 5900
 Connection ~ 2950 4500
-$Comp
-L R R7
-U 1 1 507EA6FD
-P 3100 4950
-F 0 "R7" V 3180 4950 50  0000 C CNN
-F 1 "R" V 3100 4950 50  0000 C CNN
-	1    3100 4950
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R8
-U 1 1 507EA70C
-P 3250 4950
-F 0 "R8" V 3330 4950 50  0000 C CNN
-F 1 "R" V 3250 4950 50  0000 C CNN
-	1    3250 4950
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R9
-U 1 1 507EA71B
-P 3400 4950
-F 0 "R9" V 3480 4950 50  0000 C CNN
-F 1 "R" V 3400 4950 50  0000 C CNN
-	1    3400 4950
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R10
-U 1 1 507EA72A
-P 3550 4950
-F 0 "R10" V 3630 4950 50  0000 C CNN
-F 1 "R" V 3550 4950 50  0000 C CNN
-	1    3550 4950
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	3100 4700 3100 3900
 Connection ~ 3100 3900
@@ -431,42 +465,6 @@ Connection ~ 3400 3700
 Wire Wire Line
 	3550 4700 3550 3600
 Connection ~ 3550 3600
-$Comp
-L LED D2
-U 1 1 507EA76D
-P 3100 5550
-F 0 "D2" H 3100 5650 50  0000 C CNN
-F 1 "LED" H 3100 5450 50  0000 C CNN
-	1    3100 5550
-	0    -1   -1   0   
-$EndComp
-$Comp
-L LED D3
-U 1 1 507EA77C
-P 3250 5550
-F 0 "D3" H 3250 5650 50  0000 C CNN
-F 1 "LED" H 3250 5450 50  0000 C CNN
-	1    3250 5550
-	0    -1   -1   0   
-$EndComp
-$Comp
-L LED D4
-U 1 1 507EA78B
-P 3400 5550
-F 0 "D4" H 3400 5650 50  0000 C CNN
-F 1 "LED" H 3400 5450 50  0000 C CNN
-	1    3400 5550
-	0    -1   -1   0   
-$EndComp
-$Comp
-L LED D5
-U 1 1 507EA79A
-P 3550 5550
-F 0 "D5" H 3550 5650 50  0000 C CNN
-F 1 "LED" H 3550 5450 50  0000 C CNN
-	1    3550 5550
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
 	3100 5350 3100 5200
 Wire Wire Line
@@ -502,7 +500,8 @@ Connection ~ 5850 1850
 Connection ~ 4300 2350
 Connection ~ 4300 5050
 Connection ~ 4000 2850
+NoConn ~ 2200 3400
+NoConn ~ 2850 3400
 Wire Wire Line
-	2200 3400 2850 3400
-Connection ~ 3500 4500
+	2950 4500 3500 4500
 $EndSCHEMATC
