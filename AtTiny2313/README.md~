@@ -1,0 +1,19 @@
+xcj_swarm/AtTiny2313
+=========
+
+Part of Xinchejian Swarm Robot project - contains ALL software and hardware for AtTiny2313 SwarmRobots.
+
+As there are now many different types of SwarmRobots, moving all AtTiny2313 files here.
+
+
+/software/SwarmIRControl		SwarmRobot(s) respond to RC5 IR comamnds
+/software/SwarmIRControllerArduino	Send RC5 commands to SwarmRobot(s) using an Arduino (most remotes in China are NEC protocol!)
+
+
+... to do 
+	- add non-rc5 ie any IR follow to SwarmIRControl
+	- move all AtTiny software & hardware files form root of this repo here.
+
+
+
+
