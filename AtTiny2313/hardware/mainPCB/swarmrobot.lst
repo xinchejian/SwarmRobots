@@ -1,0 +1,45 @@
+eeschema (2011-nov-30)-testing  >> Creation date: Sun 12 Aug 2012 14:56:45 CST
+
+#Cmp ( order = Reference )
+| ATTINY2313 ATTINY2313DIP/SO 	    See metal lockers - bottom right shelf
+| L293D1     L293D       	    See metal lockers - botom right shelf
+| ICSP1      CONN_3X2    	    See metal lockers - top right shelf
+| M1         CONN_2      	\
+| M2         CONN_2      	 |  See metal lockers - top right shelf
+| P1         CONN_2      	 |      
+| P2         CONN_6      	 |      
+| P3         CONN_2            	 |
+| P4         CONN_6            	 |
+| PWR_IN1    CONN_2            	/
+| PWR_LED1   LED         
+| PWR_SWITCH1 SWITCH_INV  
+| R1         200         	\
+| R2         200         	 | See resistor box on Pillar
+| R3         200         	/
+| RX_LED1    LED         
+| TX_LED1    LED         
+| U1         78L05      	See Project display area r3c1 - but only have 7805! 
+#End Cmp
+
+#Cmp ( order = Value )
+| ATTINY2313DIP/SO ATTINY2313
+| CONN_3X2     ICSP1     
+| L293D        L293D1    
+| CONN_2       M1        
+| CONN_2       M2        
+| CONN_2       P1        
+| CONN_2       P3        
+| CONN_6       P2        
+| CONN_6       P4        
+| CONN_2       PWR_IN1   
+| SWITCH_INV   PWR_SWITCH1
+| LED          PWR_LED1  
+| 200          R1        
+| 200          R2        
+| 200          R3        
+| LED          RX_LED1   
+| LED          TX_LED1   
+| 78L05        U1        
+#End Cmp
+
+#End List

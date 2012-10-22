@@ -71,3 +71,17 @@ More at the XinCheJian website wiki.xinchejian.com
 				http://wiki.xinchejian.com/wiki/Category:AFRON_$10_Robot_Competition
 
 
+************************************************************
+Changes made to move from previous mess to this structure:-
+
+/swarmIR		-> AtTiny2313/hardware/swarmIRShield
+/kicad			-> AtTiny2313/hardware/mainPCB
+
+/source-Avoid-Follow	-> AtTiny2313/software/SwitchShield_Avoid_Follow 
+/source-IR		-> AtTiny2313/software/IR_Follow_AFRON
+/swarm_wall_follow_ir	-> AtTiny2313/software/IR_object_detection
+
+All the Arduino code files also renamed so can open sketches in the folder!
+
+************************************************************
+
