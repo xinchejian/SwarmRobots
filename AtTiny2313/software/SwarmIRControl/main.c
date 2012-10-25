@@ -1,5 +1,37 @@
+//TODO - investigate if can decode MORE bits here - then can have more commands & groups (easy to add more in Arduino code)
+//TODO - extend switch to handle all the cmd combinations
+
+
 #include "main.h"
 
+/*
+RC5 Address/ID/sys is 5 bits = 32, cmd is 6 bits = 64
+    future:RC6 adds one more bit - but that also requires updated the IR decoding code.
+Robot actions = #cmds (stop, f/b, 2xturn f/b, 2xspin f/b)=11 + allow for "more" actions - charge, follow me, .....
+
+So start with:
+    RC5
+        - Address/ID/sys is 5 bits = 32 = 0x1F,     => SwarmRobot Group - each bit = 1 group - so a SwarmRobot can be in 0, 1 or many groups.
+            0x0     not member of any group - ACT ON every COMMAND
+            0x1     group 1 ACT on group 1 commands
+            0x2     group 2
+            0x4     group 3
+            0x8     group 4
+            0x10    group 5
+            0x12    groups 5 & 2 ACT on group 2 & 5 commands
+            ......
+
+        - cmd is 6 bits = 64 = 0x3F                 => 0x0-0x1F = rc5Command
+                                                    keep last bit spare for now - can use either for commands or for another group
+
+    Note if need more than 32 SwarmRobots in a group, then just combine one or more groups - in the code.
+*/
+#define ROBOT_CMD_MASK  0x1F
+
+//Ultimate aim is to put a groups for each robot in EEPROM, then use that to control group & individual behaviour
+// This way code can be updated without overwriting group membership data!
+// for now just KISS with a #define
+#define MY_GROUPS 0x9  // groups 1 and 4.
 
 // >>> Use of the serial works BUT
 //      - speed is way off without crystal adn most terminals canto read
@@ -9,9 +41,14 @@
 #include "serial.h"
 #endif
 
-#define IR_PIN PIND
-#define IR_IN  PD6
+// These pins receive signals from the IR LEDs
+#define IR_FC PD4              // IR LED Front Center
+#define IR_R  PB0              // IR LED Rear
+#define IR_FL PD6              // IR LED Front Left
+#define IR_FR PB1              // IR LED Front Right
 
+#define IR_IN  PD6             // Pin used for IR RC5 decode - using seperate (duplicate) definition to above - so can easily change!
+#define IR_PIN PIND            // port of pin above - used in IR decode function
 
 #define FLASHLED
     #ifdef FLASHLED
@@ -49,10 +86,10 @@ int main(void)
   char sys[3];
   char cmd[3];
 #endif
-  uint16_t frame;
-  uint8_t toggle;
-  uint8_t id;
-  uint8_t command;
+  uint16_t rc5Frame;
+  uint8_t rc5Toggle;
+  uint8_t rc5Id;
+  uint8_t rc5Command;
 
   main_init();
 #ifdef SERIAL
@@ -63,28 +100,50 @@ int main(void)
   serial_puts("RC5 IR Decoder\r\n");
 #endif
   while(1) {
-    frame = detect();
-    if (frame != 0xFFFF) {
-    id = (frame >> 6) & 0x1F;
-    command = frame & 0x3F;
-    toggle = (frame >> 11) & 0x01;
+    rc5Frame = detect();
+    if (rc5Frame != 0xFFFF) {
+    rc5Id = (rc5Frame >> 6) & 0x1F;
+    rc5Command = rc5Frame & 0x3F;
+    rc5Toggle = (rc5Frame >> 11) & 0x01;
 
-    if (command == 16) {
-        stopNow();
+    // if received ID matches any group this robot belongs to, do the action specified!
+    if ((rc5Id & MY_GROUPS) || (MY_GROUPS == 0)) {
+        switch (rc5Command)
+        {
+
+ //TODO: use: ROBOT_CMD_MASK + change cmd range 0-0x1F AND update teh Arduino IR sending program!
+            case 1:
+            {
+                stopNow();
+                break;
+            }
+            case 2:
+            {
+                forward();
+                break;
+            }
+            case 4:
+            {
+                backward();
+                break;
+            }
+            case 8:
+            {
+                turnLeft();
+                break;
+            }
+            case 16:
+            {
+                turnRight();
+                break;
+            }
+            default:
+            {
+                //stopNow();
+                break;
+            }
+        }
     }
-    else if (command == 17) {
-        forward();
-    }
-    else if (command == 18) {
-        backward();
-    }
-    else if (command == 19) {
-        turnLeft();
-    }
-    else if (command == 20) {
-        turnRight();
-    }
-    //else stopNow();
 
 #ifdef FLASHLED
 //  bit/LED off &=0, on |=1
@@ -92,15 +151,15 @@ int main(void)
 #endif
 
 #ifdef SERIAL
-      utoa(id, sys, 10);
-      utoa(command, cmd, 10);
+      utoa(rc5Id, sys, 10);
+      utoa(rc5Command, cmd, 10);
 
       serial_puts("sys: ");
       serial_puts(sys);
       serial_puts(" cmd: ");
       serial_puts(cmd);
-      serial_puts(" toggle: ");
-      serial_putc(toggle + '0');
+      serial_puts(" rc5Toggle: ");
+      serial_putc(rc5Toggle + '0');
       serial_puts("\r\n");
 #endif
     }
@@ -204,7 +263,7 @@ ISR(TIMER0_OVF_vect)
 
 uint16_t detect(void)
 {
-  uint16_t frame;
+  uint16_t rc5Frame;
   uint8_t i, temp, ref1, ref2;
   inttemp = 0;
   timerH = 0;
@@ -252,7 +311,7 @@ uint16_t detect(void)
     }
 
     //timerL = 0;
-    frame = 0;
+    rc5Frame = 0;
 
     // sample the 12 data bits
     for(i=0;i<12;i++)
@@ -262,10 +321,10 @@ uint16_t detect(void)
       while (timerL < ref1)
         ;
 
-      frame <<= 1;
+      rc5Frame <<= 1;
       if (bit_is_set(IR_PIN, IR_IN)) {
         // store a 1
-        frame |= 0x01;
+        rc5Frame |= 0x01;
 
         while(bit_is_set(IR_PIN, IR_IN)) {
           if (timerL > ref2) {
@@ -281,8 +340,8 @@ uint16_t detect(void)
          }
       }
     }
-    // frame == 12 bits stored.
-    return frame;
+    // rc5Frame == 12 bits stored.
+    return rc5Frame;
   fault:
     // return fault code
     return 0xFFFF;
