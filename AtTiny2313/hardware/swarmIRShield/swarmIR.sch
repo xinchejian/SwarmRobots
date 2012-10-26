@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Thu 18 Oct 2012 08:24:53 CST
+EESchema Schematic File Version 2  date Fri 26 Oct 2012 22:03:20 CST
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title ""
-Date "18 oct 2012"
+Date "26 oct 2012"
 Rev ""
 Comp ""
 Comment1 ""
@@ -504,4 +504,10 @@ NoConn ~ 2200 3400
 NoConn ~ 2850 3400
 Wire Wire Line
 	2950 4500 3500 4500
+Text Notes 1050 6850 0    60   ~ 0
+** NOTE: Extra IR receiver LEDs are on the board so they can be tested in different positions!\nThe outputs of U4 & 6 are connected together.  Same with U2 & U5.\n\nSo only use ONE of each pair! They will not work with both LEDs in one pair connected!
+Text Notes 950  5250 0    60   ~ 0
+D2-D5 & R7-R10 are optional SMDs\nfor visual indication of signals received.
+Text Notes 6650 4800 0    60   ~ 0
+C2 is backwards
 $EndSCHEMATC

@@ -2,6 +2,10 @@
 //TODO - extend switch to handle all the cmd combinations
 
 
+
+// *** This code MUST have AtTiny2313 running at **4MHz** so leave at factory default, or reset the fuse. ***
+// code can probably be updated for 8MHz ......
+
 #include "main.h"
 
 /*
@@ -91,6 +95,9 @@ int main(void)
   uint8_t rc5Id;
   uint8_t rc5Command;
 
+  int timoutCounter = 0;
+  int timeout = 50;            // how many counts to get before timeout is triggered.
+
   main_init();
 #ifdef SERIAL
   serial_init(9600);
@@ -102,48 +109,49 @@ int main(void)
   while(1) {
     rc5Frame = detect();
     if (rc5Frame != 0xFFFF) {
-    rc5Id = (rc5Frame >> 6) & 0x1F;
-    rc5Command = rc5Frame & 0x3F;
-    rc5Toggle = (rc5Frame >> 11) & 0x01;
+        timoutCounter = 0;                  // reset timeOut counter - becasue comamdn has been recieved.
+        rc5Id = (rc5Frame >> 6) & 0x1F;
+        rc5Command = rc5Frame & 0x3F;
+        rc5Toggle = (rc5Frame >> 11) & 0x01;
 
-    // if received ID matches any group this robot belongs to, do the action specified!
-    if ((rc5Id & MY_GROUPS) || (MY_GROUPS == 0)) {
-        switch (rc5Command)
-        {
+        // if received ID matches any group this robot belongs to, do the action specified!
+        if ((rc5Id & MY_GROUPS) || (MY_GROUPS == 0)) {
+            switch (rc5Command)
+            {
 
- //TODO: use: ROBOT_CMD_MASK + change cmd range 0-0x1F AND update teh Arduino IR sending program!
-            case 1:
-            {
-                stopNow();
-                break;
-            }
-            case 2:
-            {
-                forward();
-                break;
-            }
-            case 4:
-            {
-                backward();
-                break;
-            }
-            case 8:
-            {
-                turnLeft();
-                break;
-            }
-            case 16:
-            {
-                turnRight();
-                break;
-            }
-            default:
-            {
-                //stopNow();
-                break;
+     //TODO: use: ROBOT_CMD_MASK + change cmd range 0-0x1F AND update teh Arduino IR sending program!
+                case 1:
+                {
+                    stopNow();
+                    break;
+                }
+                case 2:
+                {
+                    forward();
+                    break;
+                }
+                case 4:
+                {
+                    backward();
+                    break;
+                }
+                case 8:
+                {
+                    turnLeft();
+                    break;
+                }
+                case 16:
+                {
+                    turnRight();
+                    break;
+                }
+                default:
+                {
+                    //stopNow();
+                    break;
+                }
             }
         }
-    }
 
 #ifdef FLASHLED
 //  bit/LED off &=0, on |=1
@@ -163,11 +171,16 @@ int main(void)
       serial_puts("\r\n");
 #endif
     }
-#ifdef FLASHLED
     else {
+        //count how many times "tried" to decode & failed
+        if (timoutCounter++ > timeout) {
+            stopNow();
+            timoutCounter = 0;
+        }
+#ifdef FLASHLED
         PORTD &= ~(1 <<RX);          // turn LED off
-    }
 #endif
+    }
   }
 
   //stopNow();

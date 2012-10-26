@@ -1,6 +1,6 @@
-update=Fri 12 Oct 2012 11:03:35 CST
+update=Fri 26 Oct 2012 10:09:02 CST
 version=1
-last_client=cvpcb
+last_client=eeschema
 [general]
 version=1
 [pcbnew]
@@ -34,13 +34,16 @@ LibName10=pga_sockets
 LibName11=valves
 LibName12=TSOP1838
 LibDir=
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
+EquName2=capa_pol
 [eeschema]
 version=1
 LibDir=
 NetFmtName=
-HPGLSpd=20
-HPGLDm=15
-HPGLNum=1
 RptD_X=0
 RptD_Y=100
 RptLab=1
@@ -78,9 +81,3 @@ LibName29=contrib
 LibName30=valves
 LibName31=tsop1838
 LibName32=atmega32u4
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
-EquName2=capa_pol

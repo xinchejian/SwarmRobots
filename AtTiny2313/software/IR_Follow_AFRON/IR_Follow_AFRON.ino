@@ -1,10 +1,10 @@
 /*
   Xinchejian Hackerspace Shanghai SwarmRobot http://wiki.xinchejian.com/wiki/Swarm_robots/
-  
+
   Implements core motor driver functionality and simple InfraRed (IR) chasing.
-  
+
   Licence CC by SA
-  
+
   Sofware version              IR1.01  Date:- 2012-08-30
 
   Uses Hardware:-
@@ -14,14 +14,19 @@
 
 /*
   Release notes for this version:
-  
+
   - Added Notes_Tips_ToDO files so the main code looks simpler and is not overwhelming!
   - Lots of comments added and things shuffled about to make things more readable
-  - Added #define SPIN to allow SwarmBot to turn on the spot (one wheel goes forward, other backwards), 
+  - Added #define SPIN to allow SwarmBot to turn on the spot (one wheel goes forward, other backwards),
     else pivot on one wheel while other drives forwards
   - Discarded changes in previous version as motor drive logic was not working
-  
+
 */
+
+
+// *** This code MUST have AtTiny2313 running at 8MHz so change from factory default of 4MHz!! ***
+// this can be done in Arduino programmign GUI by Tools menu - BurnBootloader.
+
 
 
 //********************************************************************************************************
@@ -53,7 +58,7 @@
 #define SPD_NORMAL 200       // setting for PWM motor control Normal
 #define SPD_SLOW 100         // setting for PWM motor control Slow
 
-#define SPIN true            // Turn on the spot (one wheel goes forward, other backwards), 
+#define SPIN true            // Turn on the spot (one wheel goes forward, other backwards),
                              // else pivot on one wheel while other drives forwards
 
 #define FLASH_ON_IR          // if this is defined, then flash the Rx &/or Tx LEDs to indicate direction of received IR.
@@ -69,13 +74,13 @@ void setup() {
   pinMode(M_LB, OUTPUT);
   pinMode(M_RF, OUTPUT);
   pinMode(M_RB, OUTPUT);
-  
+
   #ifndef PWM
   // just testing no PWM, L293 always enabled!
   pinMode(M_REn, OUTPUT);
   pinMode(M_LEn, OUTPUT);
   digitalWrite(M_REn, HIGH);    // Low is disabled
-  digitalWrite(M_LEn, HIGH);    // Low is disabled  
+  digitalWrite(M_LEn, HIGH);    // Low is disabled
   #endif
 
   pinMode(IR_FC, INPUT);        // Front Center IR LED input Attiny pin
@@ -87,7 +92,7 @@ void setup() {
   pinMode(TxPin, OUTPUT);
 
   stopNow();                    //make sure all pins initialised & both motors stopped
-  
+
   //Moving forward for short time to show this SwarmBot is working OK!
   forward(SPD_FAST);
   delay(300);
@@ -95,13 +100,13 @@ void setup() {
 
 
 void loop() {
-  
+
   // Read all the IR LED outputs
   boolean IR_front = digitalRead(IR_FC);
   boolean IR_left = digitalRead(IR_FL);
   boolean IR_right = digitalRead(IR_FR);
   boolean IR_rear = digitalRead(IR_R);
-  
+
   // Move the SwarmBot in direction of the 'best' IR signal
   if( (IR_front == LOW) && ( 0 == (IR_left ^ IR_right)) ) {
     forward(SPD_FAST);
@@ -117,8 +122,8 @@ void loop() {
     delay(100);
   }else {
     stopNow();
-  }  
-  
+  }
+
   #ifdef FLASH_ON_IR
   //Turn both LEDs OFF - so they flash a bit - just for showing off!
   digitalWrite(R_LED, LOW);

@@ -1,4 +1,8 @@
 
+// *** This code MUST have AtTiny2313 running at 8MHz so change from factory default of 4MHz!! ***
+// this can be done in Arduino programmign GUI by Tools menu - BurnBootloader.
+
+
 //Spencer trying out new PCB 2012-08-18
 
 // Todo - connect motors and test
@@ -6,7 +10,7 @@
 //      - NO colour LEDs on IR shield, just use the RxTx LEDs to show left/right
 //          and both on to show straight ahead. Ignore rear for now :)
 
-// Don't forget to use Arduino pin numbers 
+// Don't forget to use Arduino pin numbers
 //    - NOT the physical chip pin numbers!
 // See the spreadsheet in git for the full pin mapping
 
@@ -58,13 +62,13 @@ void setup() {
 
 void loop() {
 
-  digitalWrite(LedRx, HIGH);  
+  digitalWrite(LedRx, HIGH);
   digitalWrite(LedTx, LOW);
   delay(100);
   digitalWrite(LedRx, LOW);
   digitalWrite(LedTx, HIGH);
   delay(100);
-  
+
   // Read all the IR LED outputs
   int l = digitalRead(T_L);
   int f = digitalRead(T_F);
@@ -101,7 +105,7 @@ void stopNow(){
   digitalWrite(M_LF, 0);
   digitalWrite(M_RB, 0);
   digitalWrite(M_RF, 0);
-  
+
   analogWrite(M_REn, 0);    // PWM pin
   analogWrite(M_LEn, 0);    // PWM pin
 }

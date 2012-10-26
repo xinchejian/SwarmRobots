@@ -1,3 +1,8 @@
+// *** This code MUST have AtTiny2313 running at 8MHz so change from factory default of 4MHz!! ***
+// this can be done in Arduino programmign GUI by Tools menu - BurnBootloader.
+
+
+
 //Spencer trying out new PCB 2012-08-18
 
 // Todo - connect motors and test
@@ -5,7 +10,7 @@
 //      - NO colour LEDs on IR shield, just use the RxTx LEDs to show left/right
 //          and both on to show straight ahead. Ignore rear for now :)
 
-// Don't forget to use Arduino pin numbers 
+// Don't forget to use Arduino pin numbers
 //    - NOT the physical chip pin numbers!
 // See the spreadsheet in git for the full pin mapping
 
@@ -16,8 +21,8 @@
 
 #define M_LF 2               // Motor Left Front
 #define M_LB 3               // Motor Left Back
-#define M_RF 4               // Motor Right Front
-#define M_RB 5               // Motor Right Back
+#define M_RF 5               // Motor Right Front
+#define M_RB 4               // Motor Right Back
 
 #define M_REn 7              // Motor Right Enable
 #define M_LEn 11             // Motor Left Enable
@@ -62,7 +67,7 @@ void setup() {
 
   // SETUP pin modes for te PWM pin
   DDRB = DDRB | (1 << PB4);
-  
+
   stopNow();
 }
 
@@ -81,7 +86,7 @@ void delay_us(uint16_t us) {
 }
 
 uint8_t pulse(uint16_t ontime, uint16_t offtime){
-  
+
   TCNT1 = 0; // Clear timer counter
   TIFR = 0;  // Clear timer flags
   OCR1A = 105;
@@ -91,15 +96,15 @@ uint8_t pulse(uint16_t ontime, uint16_t offtime){
 
   delay_us(ontime);
 
-  uint8_t reading = (PINB & ( _BV(PB0) | _BV(PB1))) | (PIND & (_BV(PD4) | _BV(PD6)));// & PIND;  
+  uint8_t reading = (PINB & ( _BV(PB0) | _BV(PB1))) | (PIND & (_BV(PD4) | _BV(PD6)));// & PIND;
 //  uint8_t reading = PINB & _BV(PB0);
 //  uint8_t reading = PINB & _BV(PB0);
-  
+
   TCCR1A = 0;
   TCCR1B = 0;
-  
+
   PORTB &= ~_BV(PB4);
-  
+
   delay_us(ontime);
   return reading;
 }
@@ -115,7 +120,7 @@ void loop() {
     if(!(reading & _BV(PD4))) f++;
     if(!(reading & _BV(PD6))) b++;
   }
-  
+
   // If there is a blockage
   if(f > 5){
     backward(255);
@@ -150,7 +155,7 @@ void stopNow(){
   digitalWrite(M_LF, 0);
   digitalWrite(M_RB, 0);
   digitalWrite(M_RF, 0);
-  
+
   analogWrite(M_REn, 0);    // PWM pin
   analogWrite(M_LEn, 0);    // PWM pin
 }

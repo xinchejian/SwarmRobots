@@ -2,6 +2,11 @@
 // For AtTiny2313 SwarmRobot - no shield required!
 // by spanner888 usabledevices.com 2012-10 Licence:CCBYSA
 
+
+// *** This code MUST have AtTiny2313 running at 8MHz so change from factory default of 4MHz!! ***
+// this can be done in Arduino programmign GUI by Tools menu - BurnBootloader.
+
+
 #define MOTORS                      // comment out this define for testing without motors!
 
 #define NOP __asm__ __volatile__ ("nop")
@@ -52,7 +57,7 @@ void loop() {
     case 1:
       backward(SPD_FAST);
       break;
-    case 2:  
+    case 2:
       turnRight(SPD_FAST);
       break;
     case 3:
