@@ -119,7 +119,7 @@ So implement group 0 + one #group, and specified cmd# in switch (cater for 2+ se
 //Ultimate aim is to put a groups for each robot in EEPROM, then use that to control group & individual behaviour
 // This way code can be updated without overwriting group membership data!
 // for now just KISS with a #define
-#define MY_GROUP 5  // group 0 - execute ALL cmds!
+#define MY_GROUP 2  // group 0 - execute ALL cmds!
 
 #define MOTORS          // for debugging - comment out to turn off motors
 
@@ -253,7 +253,7 @@ int main(void)
         rc5Toggle = (rc5Frame >> 11) & 0x01;
 
         // if received ID matches any group this robot belongs to, do the action specified!
-        if ((rc5Id == MY_GROUP) || (MY_GROUP == 0)) {
+        if ((rc5Id == MY_GROUP) || (rc5Id == 0)) {
             actionLogic(rc5Command);
         }
 

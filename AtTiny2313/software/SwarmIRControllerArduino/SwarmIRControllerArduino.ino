@@ -42,7 +42,7 @@ IRsend irsend;               // initialise IR library
 // IR LED pin 3 (defined in Library)
 
 unsigned int IRData = 0;     // data to Transmit via IR LED
-int Group = 5;               // Group of SwarmRobot
+int Group = 2;               // Group of SwarmRobot
 
 int ledState = HIGH;         // the current state of the output pin
 int buttonState;             // the current reading from the input pin
