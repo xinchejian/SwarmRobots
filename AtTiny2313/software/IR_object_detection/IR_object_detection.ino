@@ -2,27 +2,19 @@
 // this can be done in Arduino programmign GUI by Tools menu - BurnBootloader.
 
 
-
-//Spencer trying out new PCB 2012-08-18
-
-// Todo - connect motors and test
-//      - build & connect IR shield and test
-//      - NO colour LEDs on IR shield, just use the RxTx LEDs to show left/right
-//          and both on to show straight ahead. Ignore rear for now :)
-
 // Don't forget to use Arduino pin numbers
 //    - NOT the physical chip pin numbers!
 // See the spreadsheet in git for the full pin mapping
 
-// Delay is about SIX times slower - ie delay(500); gives ~3 seconds instead of 0.5!
-// - when assuming clock is 8MHz
+// IF Delay is about SIX times slower - ie delay(500); gives ~3 seconds instead of 0.5!
+// - then you need to change the AtTiny2313 Osc fuse to 8MHz internal!
 #define NOP __asm__ __volatile__ ("nop")
 #define DELAY_CNT 11
 
 #define M_LF 2               // Motor Left Front
 #define M_LB 3               // Motor Left Back
-#define M_RF 5               // Motor Right Front
-#define M_RB 4               // Motor Right Back
+#define M_RF 4               // Motor Right Front
+#define M_RB 5               // Motor Right Back
 
 #define M_REn 7              // Motor Right Enable
 #define M_LEn 11             // Motor Left Enable
