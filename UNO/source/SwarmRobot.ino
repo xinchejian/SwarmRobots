@@ -32,11 +32,15 @@
 #include "Messager.h"
 #include "Action.h"
 
-#ifndef sbi
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#if ( ROBOT_GROUP >= (0B1 << ROBOT_GROUP_BITS) ) || (ROBOT_INNERID >= ( 0B1 << ROBOT_INNERID_BITS))
+#error
 #endif
 
+#if (ROBOT_ID_SELF == ROBOT_ID_OTHER) || (ROBOT_ID_SELF == ROBOT_ID_ANY)
+#error
+#endif
 
+uint32_t g_BaseTimeFrequency;
 
 IR_Sensor IRSensor( ROBOT_ID_SELF );
 BiMotor Wheels;
@@ -46,29 +50,64 @@ Action_cls Action( IRSensor, Wheels, Messager );
 
 
 void setup() {
+
+#if _DEBUG
+    uint8_t j;
+    Serial.begin(9600);
+
+    Serial.print("ID=");
+    Serial.println( ROBOT_ID_SELF, HEX );
+
+     Serial.print("IR Pin: FL=");
+     Serial.print(IR_R_FL_PIN);
+     Serial.print(" FR=");
+     Serial.print(IR_R_FR_PIN);
+     Serial.print(" BL=");
+     Serial.print(IR_R_BL_PIN);
+     Serial.print(" BR=");
+     Serial.println(IR_R_BR_PIN);
+
+     Serial.print("Motor Pin: EN=");
+     Serial.println(MOTOR_L_EN_PIN);
+
+#endif
   
      /*initialization of PWM */
 
     Initialize_16();          //if init and set frequency in the IRSensor construct, it will not working normally.
-    SetFrequency_16(38000);   //IR_CARRIER_FRENQUENCY
-    _SFR_MEM16(OCR1B_MEM) = 0; //((uint32_t)90*ICR1)/255;
-    _SFR_MEM16(OCR1A_MEM) = 0;
+    SetFrequency_16(38400);   //IR_CARRIER_FRENQUENCY
+    _SFR_MEM16(OCR1B_MEM) = 0;
 
+
+
+    pinMode(LED_RUNING_PIN, OUTPUT);
+
+    uint8_t i;
+    uint8_t LedPosition[]={LED_FL_PIN, LED_FR_PIN, LED_BL_PIN, LED_BR_PIN};
+
+    Serial.println("HVER_PROMINI");
+
+    for (i = 0; i < 4; ++i )
+    {
+        pinMode( LedPosition[i], OUTPUT );
+        digitalWrite( LedPosition[i] , LOW );
+        delay(200);
+    }
+
+    for (i = 0; i < 4; ++i )
+    {
+        digitalWrite( LedPosition[i] , HIGH );
+        delay(200);
+    }
+
+
+#if !_DEBUG_SENSOR_NOTIMER
     TimerInit();
-
-    pinMode(RUNING_LED_PIN, OUTPUT);
-
-    delay(5000);   // the noise of motor is loud.  so you can update software before running
-
-#if _DEBUG
-    Serial.begin(9600);
 #endif
-
 }
 
 void loop()
 {
-
     
 #if _DEBUG_MAIN
     DebugProcess();
@@ -77,72 +116,118 @@ void loop()
     Action.ActionProc();
 #endif
 
+
 }
 
 
 #if _DEBUG_MAIN
 void DebugProcess()
 {
+    static uint8_t Cnt = 0;
+
 #if _DEBUG_SENSOR
-    uint8_t Index,SenderID, MessageID, Para;
-    uint8_t MessageState = false;
+    uint8_t Index;
+    uint8_t Ret;
+    IRPosition_enum IRLoc;
+    IRMsgOutput_stru IRMsg; 
+    
+    
 
-    IRSensor.SendMessage( 0xEE, 0x88, 0xab );
-    IRSensor.SendData();
-    Index = IR_POSITION_FL;
-    IRSensor.ReceiveData(Index);
+    IRSensor.SendMessage( 0xFF, 0xAA, 0xAA );
 
-    (void)IRSensor.GetMessage( Index, &SenderID, &MessageID, &Para, &MessageState );
-    delay(100);
+#if _DEBUG_SENSOR_NOTIMER
+    IRSensor.TimerProc();
+#endif
+
+    IRSensor.PrintMsgQue();
+
+    Ret = IRSensor.GetMessage( &IRLoc, &IRMsg );
+    if ( SUCCESS == Ret )
+    {
+        Serial.print("Receive-");
+        Serial.print(IRLoc);
+        
+        if ( IRLoc < IR_RECIEVER_NUM )
+        {
+            Serial.print(":S=0X");
+            Serial.print(IRMsg.SenderID, HEX);
+            Serial.print(" M=");
+            Serial.print(IRMsg.MessageID);
+            Serial.print(" P=");
+            Serial.print(IRMsg.Para);
+            Serial.print(" V=");
+            Serial.print(IRMsg.Check);
+        }
+        
+        Serial.println("");
+
+    }
+
+    delay(200);
 
 #endif
+
 
 
 #if _DEBUG_MT
     uint8_t i;
 
-    for (i = 0; i <= MT_CLOCKRANDOM; ++i) {
+    for (i = 1; i < MT_CLOCKRANDOM; ++i) {
         Serial.print("Move to: ");
         Serial.println(i);
-
+        delay(500);
+        
         Wheels.Move((MTMovDir_enum) i, 1);
 
-        delay(8000);
+        delay(1000);
     }
 #endif
 
+
+
 #if _DEBUG_MS
-    uint8_t i;
-    uint8_t Index,SenderID, MessageID, Para;
-    uint8_t State;
-#if !_DEBUG_ACTION        
-    IRSensor.SendMessage( 0xEE, 0x88, 0xa0 );
+
+#if !_DEBUG_ACTION
+    uint8_t Info;
+    IRSensor.SendMessage( 0xFF, 0xaa, 0x55 );
 
     Messager.MessageProc();
 
-
-    for (i = 1; i < MS_CONDITIONTBL_NUM; ++i)
+    if ( true == Messager.IsEnvInfoValid() )
     {
-        Messager.GetExteriorInfo( (ExteriorInfoID_enum)i, &State );
-        Serial.print("ExInfo ");
-        Serial.print(i);
-        Serial.print(": S=");
-        Serial.println(State);
+        Messager.GetEnvObstacleInfo( &Info );
+        Serial.print("Obstacle: ");
+        Serial.println(Info, HEX);
+
+        Messager.ShowEnvRobotInfo();
+        Messager.ClrEnvInfo();
+
     }
 
-    delay(1000);
+    delay(10);
 #endif
 #endif
+
+
 
 #if _DEBUG_ACTION
 
     Messager.MessageProc();
     Action.ActionProc();
 
-    delay(500);
+    //delay(30);
 
 #endif
 
+#if _DEBUG_TIMER
+    Serial.print("STimer: MaxT=");
+    Serial.print(gIRTimerTest.Period);
+    Serial.print("Cnt=");
+    Serial.print(gIRTimerTest.Cnt);
+    Serial.print("Who=");
+    Serial.println(gIRTimerTest.Who, BIN);
+    gIRTimerTest.Period = 0;
+#endif
 
 }
 #endif
@@ -154,12 +239,15 @@ void DebugProcess()
 
 void TimerInterruptHandler()
 {
-#if !_DEBUG_SENSOR  //can not use serial.print in interrupt
     IRSensor.TimerProc();
-#endif
+
     Wheels.TimerProc();
 
-#if _DEBUG_MT
+    Action.TimerProc();
+    
+    
+
+#if _DEBUG
  {
     static uint16_t Cnt = 0;
     static uint8_t Flag = LOW;
@@ -167,7 +255,7 @@ void TimerInterruptHandler()
     if ( 2000 < Cnt )
     {
       Flag = !Flag;
-      digitalWrite(RUNING_LED_PIN, Flag);
+      digitalWrite(LED_RUNING_PIN, Flag);
       Cnt = 0;
     }
     Cnt ++; 
@@ -175,6 +263,28 @@ void TimerInterruptHandler()
 #endif
     
 }
+
+
+ISR(TIMER2_OVF_vect)
+{
+    TimerInterruptHandler();
+}
+
+
+void TimerInit()
+{
+    //Initialize  frenquency Timer0
+    Initialize_8( TIMER2_OFFSET );
+    g_BaseTimeFrequency = IRSensor.GetTimerFrequency();
+    SetFrequency_8(TIMER2_OFFSET, g_BaseTimeFrequency);
+
+    //set interrupt vector
+
+    bitSet(TIMSK2, TOIE2);
+    bitSet(TIFR2,TOV2);
+}
+
+#if 0
 
 ISR(TIMER0_COMPA_vect)
 {
@@ -186,12 +296,12 @@ void TimerInit()
     //Initialize  frenquency Timer0
     uint32_t Val;
 
-    Val = IRSensor.GetTimerFrequency();
-    SetFrequency_8(0, Val);
+    g_BaseTimeFrequency = IRSensor.GetTimerFrequency();
+    SetFrequency_8(0, g_BaseTimeFrequency);
     //set interrupt vector
 
-
-    sbi(TIMSK0, OCIE0A);
-    sbi(TIFR0,OCF0A);
+    bitSet(TIMSK0, OCIE0A);
+    bitSet(TIFR0,OCF0A);
 }
+#endif
 

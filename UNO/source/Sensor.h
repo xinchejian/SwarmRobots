@@ -8,34 +8,54 @@
 #include <inttypes.h>
 
 #if _DEBUG
-#define _DEBUG_SENSOR 0
+#define _DEBUG_SENSOR 1
 #endif
 
-#define IR_POWER_DUTY 20
-#define IR_TXRX_REPEATTIMES 2
+#if _DEBUG_SENSOR
+#define _DEBUG_SENSOR_NOTIMER 0
+#endif
+
+
+#define IR_TXRX_REPEATTIMES 1
+#define IR_RECIEVER_NUM 4
+
+#define IR_POWER_DUTY 30
 
 /*To define the pins of MCU connected with sensors, you shoud set them in fact*/
-#define IR_E_PIN 10
-#define IR_RECIEVER_NUM 4
-#define IR_R_FL_PIN 8
-#define IR_R_FR_PIN 12
-#define IR_R_BL_PIN 11
-#define IR_R_BR_PIN A2  //cannot use 13 pin on arduino uno
+#define IR_E_PIN 9
+#define IR_R_FL_PIN A3
+#define IR_R_FR_PIN A2
+#define IR_R_BL_PIN A0
+#define IR_R_BR_PIN A1  //cannot use 13 pin on arduino uno
 
-//must less than IR_RECIEVER_NUM
+
+
+#if _DEBUG_TIMER
+typedef struct
+{
+    uint8_t Period;  // microsecond/4
+    uint8_t Cnt;
+    uint8_t Who;     //0bit = receiver 0; ..  4bit = emitter
+}IRTimerTest_stru;
+
+extern IRTimerTest_stru gIRTimerTest;
+#endif
+
 typedef enum
 {
-    IR_POSITION_FL = 0,
-    IR_POSITION_FR = 1,
-    IR_POSITION_BL = 2,
-    IR_POSITION_BR = 3
+    IR_POSITION_FL = 0,   //it is used as index of array, it must the first
+    IR_POSITION_FR,
+    IR_POSITION_BL,
+    IR_POSITION_BR,       //must less than IR_RECIEVER_NUM
+    IR_POSITION_CTL = IR_RECIEVER_NUM
 }IRPosition_enum;
 
 
 /*To define the paras about communication*/
-#define COMM_FREQUENCY 2000
+#define COMM_FREQUENCY 1600
 #define SAMPLE_TIMES (IR_RECIEVER_NUM + 1)
 #define TIMER_FREQUENCY (COMM_FREQUENCY * SAMPLE_TIMES)
+#define SAMPLE_OFFSET  1  // (SAMPLE_TIMES >> 1)
 
 //to balance the cpu, exuctive different task at different timer cycle
 #define IR_Phase_TX ( SAMPLE_TIMES -1 )
@@ -45,18 +65,17 @@ typedef enum
 #define IR_COMM_BITCUR_INIT ( 8 - IR_COMM_START_BITNUM )
 #define IR_DATA_TTL 5    //TTL message in the buffer of ReceiveBuf_stru or TxBuf_stru
 
-#define IR_CARRIER_FRENQUENCY 38000
+//#define IR_CARRIER_FRENQUENCY 38000
 
 
 /*To define the data format about communication*/
 typedef struct{
-    uint8_t StartBits;     //start bits, send from LSB
+    uint8_t StartBits;     //start bits, send from LSB. it must be the first
     uint8_t ReceiverID;    // 0 means the buff is null;  0xFF means all of robots
     uint8_t SenderID;
     uint8_t MessageID;
     uint8_t Para;
-    uint8_t VerifyFirst;   // Verify bytes, the value should be equal to the value of the first byte
-    uint8_t VerifyLast;    // Verify bytes, the value should be equal to the value of the last byte
+    uint8_t Check;   // Verify byte, using XOR BCC(block check character).  it must be uint8 and the last element
 }TxRxBuf_stru;
 
 typedef TxRxBuf_stru TxBuf_stru;
@@ -64,12 +83,19 @@ typedef TxRxBuf_stru RxBuf_stru;
 
 #define IR_BUFF_LENTH sizeof(TxRxBuf_stru)
 
+typedef struct MsgOutput
+{
+    uint8_t SenderID;
+    uint8_t MessageID;
+    uint8_t Para;
+    uint8_t Check;   //only for debuging
+}IRMsgOutput_stru;
+
 typedef enum
 {
     RX_EMPTY = 0,
     RX_RECEIVING,
     RX_MSG_OK,
-    RX_UNOBSTACLE     // RECEIVE NOTHING means RX_UNOBSTACLE
 }RXBufState_enum;
 
 typedef enum
@@ -85,12 +111,29 @@ typedef struct {
     uint8_t State;
     uint8_t ByteCursor;   // 0 base
     uint8_t BitCursor;    // in a byte, from 0-7
-    uint8_t TTLCounter;
     uint8_t RunPhase;
+    bool PhaseFlag;     //in order to sample at the middle of a pulse, only used by receiver
 }TxRxCtrl_stru;
 
 typedef TxRxCtrl_stru TxCtrl_stru;
 typedef TxRxCtrl_stru RxCtrl_stru;
+
+/**/
+typedef enum
+{
+    IR_MSG_NULL = 0,
+    IR_MSG_WAIT_GETSELF
+}MsgState_enum;
+
+/**/
+#define IR_MSG_QUE_NUM (IR_RECIEVER_NUM + 2)  //the max numbers of receiving msg is IR_RECIEVER_NUM at the same time
+#define QUE_CURSOR_INVALID 0xFF
+
+typedef struct {
+    uint8_t Head;  //piont to valid data, init value = 0xFF
+    uint8_t Tail;  //piont to the unused
+    uint8_t aData[IR_MSG_QUE_NUM];  //to store the index of MSG
+}MsgFIFOQue;
 
 
 
@@ -99,6 +142,7 @@ class IR_Sensor {
 
   private:
   
+    MsgFIFOQue MsgFifo;
 
     /*about TX*/
     uint8_t TxPin;
@@ -121,11 +165,13 @@ class IR_Sensor {
     void SetSendChance();
 
     inline void SetRxBufState( uint8_t Index, uint8_t State );
-    inline bool VerifyData( uint8_t Index );
+    uint8_t CaculateCheckData( uint8_t * pData, uint8_t ByteLen );
+    bool VerifyRecData( uint8_t Index );
 
-    inline void TTLCaculate();
-    inline void AdjustRxStateAfterSend();
     inline void EnableSend(void);
+
+    uint8_t PutToMsgQue(uint8_t Index);
+    uint8_t GetFromMsgQue(uint8_t *pIndex);
 
 #if !_DEBUG_SENSOR
     inline void SendData(void);
@@ -139,13 +185,15 @@ class IR_Sensor {
     IR_Sensor(const uint8_t RobotID);
     ~IR_Sensor();
     uint8_t SendMessage(uint8_t ReceiverID, uint8_t MessageID, uint8_t para);
-    uint8_t GetMessage(uint8_t Index, uint8_t *pSenderID, uint8_t *pMessageID, uint8_t *pPara, uint8_t *pMessageState );
+    uint8_t GetMessage(IRPosition_enum *pIRLoc, IRMsgOutput_stru *pMsg );
     uint32_t GetTimerFrequency(void);
     void TimerProc();
     
 #if _DEBUG_SENSOR
     void SendData(void);
     void ReceiveData( uint8_t Index );
+    void PrintMsgQue();
+    void PrintCtl();
 #endif
 
 };

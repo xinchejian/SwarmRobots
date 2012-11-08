@@ -9,11 +9,16 @@
 
 
 #define MOTOR_L_EN_PIN 9     //to control the speed by PWM(connecting to LM EN pin)
-#define MOTOR_L_DIRPINA A1  //The control direction pin of left motor (connecting to LM 1A pin)
-#define MOTOR_L_DIRPINB A0
+#define MOTOR_L_DIRPINA 6  //The control direction pin of left motor (connecting to LM 1A pin)
+#define MOTOR_L_DIRPINB 7
 #define MOTOR_R_EN_PIN 9
-#define MOTOR_R_DIRPINA A4
-#define MOTOR_R_DIRPINB A5
+#define MOTOR_R_DIRPINA 4
+#define MOTOR_R_DIRPINB 5
+
+
+//#define MT_DUTY(Val) _SFR_MEM16(OCR1A_MEM) = (uint16_t)((uint32_t)(Val)*ICR1)/255
+#define MT_DUTY(Val) OCR1A = (uint16_t)( ((uint32_t)(Val)*ICR1)>>8 )
+
 
 
 
@@ -41,8 +46,8 @@ typedef enum MT_SPEED
 {
     MT_SPEED_ZERO = 0,
     MT_SPEED_SLOW = 230,    //  duty = MT_SLOW/255
-    MT_SPEED_NORMAL = 245,
-    M_SPEED_FAST = 255
+    MT_SPEED_NORMAL = 250,
+    M_SPEED_FAST = 255    
 }MTSpeed_enum;
 
 #define ANGLE_RANDOM 0  //0-180 degree

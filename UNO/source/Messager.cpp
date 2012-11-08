@@ -25,30 +25,14 @@
 #include "Messager.h"
 
 /*checking constrain*/
-#if !((EXTERIOR_ID_END - EXTERIOR_ID_BEGIN) == EXTERIOR_ID_END)
-    #error
-#endif
 
 #if !( 256 > EXTERIOR_ID_END )
     #error
 #endif
 
-
-
-/*public*/
-MsgToInfoRec_stru Messager_cls::MsgToInfoRule[] =
-{
-    //&SenderID,    &MessageID, SensorIndex;       condition)
-    { RX_MSG_OK, ROBOT_ID_SELF,  MSG_ANY, IR_POSITION_FL, OBSTACLE_FRONT_LEFT, COND_TRUE },
-    { RX_MSG_OK, ROBOT_ID_SELF,  MSG_ANY, IR_POSITION_FR, OBSTACLE_FRONT_RIGHT, COND_TRUE },
-    { RX_MSG_OK, ROBOT_ID_SELF,  MSG_ANY, IR_POSITION_BL, OBSTACLE_BEHIND_LEFT, COND_TRUE },
-    { RX_MSG_OK, ROBOT_ID_SELF,  MSG_ANY, IR_POSITION_BR, OBSTACLE_BEHIND_RIGHT, COND_TRUE },
-    { RX_UNOBSTACLE, ROBOT_ID_ANY,  MSG_ANY, IR_POSITION_FL, OBSTACLE_FRONT_LEFT, COND_FALSE },
-    { RX_UNOBSTACLE, ROBOT_ID_ANY,  MSG_ANY, IR_POSITION_FR, OBSTACLE_FRONT_RIGHT, COND_FALSE },
-    { RX_UNOBSTACLE, ROBOT_ID_ANY,  MSG_ANY, IR_POSITION_BL, OBSTACLE_BEHIND_LEFT, COND_FALSE },
-    { RX_UNOBSTACLE, ROBOT_ID_ANY,  MSG_ANY, IR_POSITION_BR, OBSTACLE_BEHIND_RIGHT, COND_FALSE }
-};
-
+#if !( POSITION_NUM < 8 )
+    #error
+#endif
 
 
 Messager_cls::Messager_cls(IR_Sensor &MySensor):MsgSrc(MySensor)
@@ -67,129 +51,217 @@ Messager_cls::Messager_cls(IR_Sensor &MySensor):MsgSrc(MySensor)
     }
     */
 
-    ClrExteriorInfo();
+    ClrEnvInfo();
 
 
 }
 
-bool Messager_cls::IsExteriorInfoValid( )
-{
-    return InfoManager.Valid;
-}
 
-void Messager_cls::GetExteriorInfo( ExteriorInfoID_enum CondID, uint8_t *pState )
-{
-    //todo
-    *pState = InfoManager.Tbl[CondID].State;
-}
 
 void Messager_cls::MessageProc()
 {
     uint8_t RetVal;
-    uint8_t i;
-    uint8_t SenderID, MessageID, Para, MsgState;
-    bool NewMsgFlag;
+    IRPosition_enum IRLoc;
+    IRMsgOutput_stru IRMsg;
 
-    MessageRec_stru MsgRec;
+    RetVal = MsgSrc.GetMessage( &IRLoc, &IRMsg );
 
-    NewMsgFlag = false;
 
-    for ( i =0; i < IR_RECIEVER_NUM; ++i )
+    if ( SUCCESS != RetVal )
     {
-        RetVal = MsgSrc.GetMessage( i, &SenderID, &MessageID, &Para, &MsgState );
-
-
-        if ( SUCCESS != RetVal )
-        {
-            NewMsgFlag = false;
-            break;  //in order to get all receiver's info
-        }
-
-        if ( (RX_UNOBSTACLE == MsgState) || (RX_MSG_OK == MsgState) )
-        {
-            //todo
-            MsgRec.State = MsgState;
-            MsgRec.SenderID = SenderID;
-            MsgRec.MessageID = MessageID;
-            MsgRec.Para = Para;
-
-            MsgToExteriorInfo( MsgRec, (IRPosition_enum)i);
-            NewMsgFlag = true;
-        }
-#if _DEBUG_MS
-        Serial.print("Rec-");
-        Serial.print(i);
-        Serial.print(" ret=");
-        Serial.print(RetVal);
-        Serial.print(":S=");
-        Serial.print(MsgState, HEX);
-        Serial.print(":F=");
-        Serial.print(SenderID, HEX);
-        Serial.print(" M=");
-        Serial.print(MessageID, HEX);
-        Serial.print(" P=");
-        Serial.println(Para, HEX);
-#endif        
-
+        return;
     }
 
-    if ( true == NewMsgFlag )
+    if ( IRLoc <  IR_POSITION_CTL )
     {
-        RefreshExteriorInfo();
+        MsgToEvnInfo( IRMsg, IRLoc);
+    }
+    else
+    {
         InfoManager.Valid = true;
     }
 
-    //todo:  在没有障碍物的情况下是收不到消息的， 因此信息的刷新要改进
+#if _DEBUG_MS
+    Serial.print("Rec-");
+    Serial.print(IRLoc);
+    if ( IRLoc < IR_RECIEVER_NUM )
+    {
+        Serial.print(":S=0X");
+        Serial.print(IRMsg.SenderID, HEX);
+        Serial.print(" M=");
+        Serial.print(IRMsg.MessageID);
+        Serial.print(" P=");
+        Serial.print(IRMsg.Para);
+        Serial.print(" V=");
+        Serial.print(IRMsg.Check);
+    }
+    Serial.println("");
+#endif        
+
 }
 
 
 
-inline void Messager_cls::MsgToExteriorInfo(MessageRec_stru &Msg, IRPosition_enum IRLoc)
+inline void Messager_cls::MsgToEvnInfo( IRMsgOutput_stru &Msg, IRPosition_enum IRLoc )
 {
-    static const uint8_t MsgToCondTblNum = sizeof( MsgToInfoRule )/sizeof( MsgToInfoRec_stru );
-    uint8_t i;
-    MsgToInfoRec_stru *pMsgTocond = NULL;
 
-    for ( i=0; i < MsgToCondTblNum ; ++i )
+    if ( ROBOT_ID_SELF == Msg.SenderID )
     {
-        pMsgTocond = &MsgToInfoRule[i];
-        if ( (IRLoc == pMsgTocond->IRPos)
-                && ( Msg.State == pMsgTocond->MsgState )
-            && ( ( ROBOT_ID_ANY == pMsgTocond->SenderID ) || (Msg.SenderID == pMsgTocond->SenderID) )
-            && ( (MSG_ANY == pMsgTocond->MessageID) || (Msg.MessageID == pMsgTocond->MessageID)) )
+        bitSet(InfoManager.ObstacleInfo, IRLoc);
+    }
+    else
+    {
+        SetEnvRobotInfo( Msg, IRLoc);
+    }
+
+}
+
+inline void Messager_cls::SetEnvRobotInfo( IRMsgOutput_stru &Msg, IRPosition_enum IRLoc )
+{
+    uint8_t SenderID, MessageID, Para;
+    uint8_t &OldRec = InfoManager.RobotInfoOldRec;
+    uint8_t Index;
+    uint8_t i;
+
+    EnvRobotInfoRec_stru *pRobotInfo = NULL;
+
+    SenderID = Msg.SenderID;
+    MessageID = Msg.MessageID;
+    Para = Msg.Para;
+
+    /*to caculate TTL by received msg; (maybe it is better to using time, but critical resource).
+     *because any msg must be dealed with by ACTION after a while, so the method is OK */
+
+    pRobotInfo = InfoManager.RobotInfo;
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( 0 < pRobotInfo->TTLCnt )
         {
-            SetExteriorInfo( pMsgTocond->CondID, pMsgTocond->CondState );
+            pRobotInfo->TTLCnt--;
         }
+
+        if ( pRobotInfo->TTLCnt < InfoManager.RobotInfo[OldRec].TTLCnt )
+        {
+            OldRec = i;
+        }
+
+        pRobotInfo++;
     }
+
+
+    /*todo: maybe receive many times for a msg, all the info will be combine, so the position is not accurate, expecially in rotating with large angle*/
+    /*if the record has been stored and than to refresh the record*/
+    pRobotInfo = InfoManager.RobotInfo;
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( 0 < pRobotInfo->TTLCnt )
+        {
+            if ( (SenderID == pRobotInfo->RobotID) && (MessageID == pRobotInfo->MsgID) )
+            {
+                Index = i;
+                break;
+            }
+        }
+
+        pRobotInfo++;
+    }
+
+    /*if new record and than to add the record*/
+    if ( ENVROBOT_INFOTBL_NUM == i )
+    {
+        Index = OldRec;
+    }
+
+    ASSERT_T( Index < ENVROBOT_INFOTBL_NUM );
+
+    pRobotInfo = InfoManager.RobotInfo;
+    pRobotInfo += Index;
+
+    pRobotInfo->RobotID = SenderID;
+    pRobotInfo->MsgID = MessageID;
+    pRobotInfo->Para =Para;
+    bitSet(pRobotInfo->Position,IRLoc);
+    pRobotInfo->TTLCnt = MSG_TTL;
 }
 
-inline void Messager_cls::SetExteriorInfo(ExteriorInfoID_enum CondID, ExteriorInfoState_enum State)
-{
-    InfoManager.Tbl[CondID].State = State;
-}
 
-void Messager_cls::ClrExteriorInfo()
+
+void Messager_cls::ClrEnvInfo()
 {
     uint8_t i;
-    //todo data collide
+
     InfoManager.Valid = false;
-    for ( i = (EXTERIOR_ID_BEGIN + 1); i < MS_CONDITIONTBL_NUM; ++i )
+    InfoManager.RobotInfoOldRec = 0;
+
+    InfoManager.ObstacleInfo= 0;
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
     {
-        InfoManager.Tbl[i].State = COND_UNKNOWN;
+        InfoManager.RobotInfo[i].TTLCnt = 0;
+        InfoManager.RobotInfo[i].Position = 0;
     }
 }
 
 
 
-inline void Messager_cls::RefreshExteriorInfo()
+inline void Messager_cls::RefreshEnvInfo()
 {
-    //todo: optimize later,  to caculate indirect conditions from primary conditions
+    uint8_t i;
+    EnvRobotInfoRec_stru *pRobotInfo = NULL;
 
-    //ExteriorInfoRec_stru (&CondTbl)[MS_CONDITIONTBL_NUM] = InfoManager.Tbl;
+    RefreshPos( InfoManager.ObstacleInfo );
+
+    pRobotInfo = InfoManager.RobotInfo;
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( 0 < pRobotInfo->TTLCnt )
+        {
+            RefreshPos( pRobotInfo->Position );
+        }
+
+        pRobotInfo++;
+    }
 
 }
 
+void Messager_cls::RefreshPos(uint8_t &Position)
+{
+    static PosRefreshRec_stru PosRefreshTbl[] =
+    {
+         // Out          InFirst           InSecond
+        { TARGET_POS_F,  TARGET_POS_FL, TARGET_POS_FR },
+        { TARGET_POS_B, TARGET_POS_BL, TARGET_POS_BR },
+        { TARGET_POS_L,  TARGET_POS_FL, TARGET_POS_BL },
+        { TARGET_POS_R,  TARGET_POS_FR, TARGET_POS_BR },
+    };
 
+    static uint8_t POSREFRESHTBL_NUM = sizeof(PosRefreshTbl)/sizeof(PosRefreshRec_stru);
+
+    uint8_t Out, InFirst, InSecond;
+    uint8_t i;
+    bool BitVal;
+
+    for ( i = 0; i < POSREFRESHTBL_NUM; ++i )
+    {
+        Out = PosRefreshTbl[i].Out;
+        InFirst = PosRefreshTbl[i].InFirst;
+        InSecond = PosRefreshTbl[i].InSecond;
+
+        BitVal = bitRead(Position, InFirst) && bitRead(Position, InSecond);
+        bitWrite(Position, Out, BitVal);
+
+#if 0
+        Serial.print(" Ref i=");
+        Serial.print(i);
+        Serial.print(" BitVal");
+        Serial.print(BitVal);
+        Serial.print(" Position");
+        Serial.println(Position,BIN);
+#endif
+    }
+}
 
 inline void Messager_cls::AgingProc()
 {
@@ -202,7 +274,154 @@ void Messager_cls::TimerProc()
     //todo ? need?
 }
 
+bool Messager_cls::IsEnvInfoValid( )
+{
+    return InfoManager.Valid;
+}
+
+/*If there are many records meeting the condition, it will return the record than its Para is the most.
+ * If the Paras are same, it will return the newest record*/
+uint8_t Messager_cls::GetEnvRobotInfo( uint8_t *pRobotID, uint8_t *pMsgID, uint8_t *pPara, uint8_t *pPosition )
+{
+    uint8_t i;
+    uint8_t RobotID, MsgID, Para, Index;
+    EnvRobotInfoRec_stru *pRobotInfo = NULL;
+
+    RefreshEnvInfo();
+#if _DEBUG_MS
+    ShowEnvRobotInfo();
+#endif
+
+    pRobotInfo = InfoManager.RobotInfo;
+    Index = INVALID;
+    RobotID = *pRobotID;
+    MsgID = *pMsgID;
+    Para = 0;
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( 0 < pRobotInfo->TTLCnt )
+        {
+            if ( (pRobotInfo->RobotID == RobotID) &&  (pRobotInfo->MsgID == MsgID) )
+            {
+                Index = i;
+                break;
+
+            }
+            else if ( (ROBOT_ID_ANY == RobotID) && (pRobotInfo->MsgID == MsgID) )
+            {             
+              /* If there are many records meeting the condition, it will return the record than its Para is the most.
+                 * If the Paras are same, it will return any record*/
+                if ( Para <= pRobotInfo->Para )
+                {
+                    Index = i;
+                    Para = pRobotInfo->Para;
+                }
+            }
+            else if ( (RobotID == pRobotInfo->RobotID) && (MSGID_ANY == MsgID) )
+            {
+                Index = i;
+                break;
+            }
+            else
+            {
+                ;  //nothing
+            }
+
+        }
+
+        pRobotInfo++;
+    }
+
+    if ( INVALID == Index )
+    {
+        return INFO_QUE_FULL;
+    }
+    
+    pRobotInfo = InfoManager.RobotInfo + Index;
+
+    *pRobotID = pRobotInfo->RobotID;
+    *pMsgID = pRobotInfo->MsgID;
+
+    if ( NULL != pPara )
+    {
+        *pPara = pRobotInfo->Para;
+    }
+
+    if ( NULL != pPosition )
+    {
+        *pPosition = pRobotInfo->Position;
+    }
+
+    return SUCCESS;
+}
+
+void Messager_cls::GetEnvObstacleInfo( uint8_t *pInfo )
+{
+    *pInfo = InfoManager.ObstacleInfo;
+}
+
+
+#if _DEBUG_MS
+void Messager_cls::ShowEnvRobotInfo()
+{
+    uint8_t i;
+    EnvRobotInfoRec_stru *pRobotInfo = NULL;
+
+
+    pRobotInfo = InfoManager.RobotInfo;
+
+    Serial.println("RobotInfo:");
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( 0 < pRobotInfo->TTLCnt )
+        {
+
+            Serial.print("RobotInfo-");
+            Serial.print(i);
+            Serial.print(":RobotID=");
+            Serial.print( pRobotInfo->RobotID );
+            Serial.print(" Msg=");
+            Serial.print( pRobotInfo->MsgID );
+            Serial.print(" Para=");
+            Serial.print( pRobotInfo->Para );
+            Serial.print(" Pos=");
+            Serial.print( pRobotInfo->Position, BIN );
+            Serial.print(" TTL=");
+            Serial.println( pRobotInfo->TTLCnt );
+        }
+
+        pRobotInfo++;
+    }
+
+
+}
+#endif
+
+
+
+
+
 #if 0
+
+/*table constraint:
+ * the first uint8_t colum must be used to identify the validation of record.  NUll means empty.
+ * the following colums must be KEY,
+ * */
+typedef struct TblCtrl
+{
+    uint8_t MaxRec;     //
+    uint8_t RecLen;     //the lenth of a record, uint:byte
+    uint8_t KeyByteNum;    // the byte numbers of the key, uint:byte
+    uint8_t EmptyIndex;  // an empty row that can be availible right now.
+}TblCtrl_stru;
+
+#define MS_MESSAGETBL_NUM 16
+#define MS_MESSAGETBL_KEYBYTENUM 2
+
+
+
 tbl_SetRec( TblCtrl_stru &MsgTblCtrl, (uint8_t *)Record )
 {
     //
@@ -212,4 +431,5 @@ tbl_ClrRec( TblCtrl_stru &MsgTblCtrl, uint8_t Index )
 {
     //
 }
+
 #endif

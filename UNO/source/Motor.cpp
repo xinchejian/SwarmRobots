@@ -21,6 +21,7 @@
 
 #include "PWM.h"
 #include "Arduino.h"
+#include "SwarmRobot.h"
 #include "Motor.h"
 
 /* Analysis of critical resource:
@@ -160,7 +161,7 @@ inline void BiMotor::Rotate(
 
     if ( ANGLE_RANDOM == Angle )
     {
-        Angle = random(10);
+        Angle = random(5);
     }
 
     if ( 0 == Angle )
@@ -197,13 +198,20 @@ inline void BiMotor::Stop( )
 {
     RunCnt = 0;
     SpeedVal = MT_SPEED_ZERO;
-    _SFR_MEM16(OCR1A_MEM) = (uint16_t)((uint32_t)SpeedVal*ICR1)/255;
+
+    MT_DUTY(SpeedVal);
 }
 
 /*private*/
 inline void BiMotor::Run( )
 {
-    _SFR_MEM16(OCR1A_MEM) = (uint16_t)((uint32_t)SpeedVal*ICR1)/255;
+    MT_DUTY(SpeedVal);
+#if _DEBUG_MT
+    Serial.print("Speed=");
+    Serial.print(SpeedVal);  
+    Serial.print(" OCR2B=");
+    Serial.println(OCR2B);
+#endif
 }
 
 /*

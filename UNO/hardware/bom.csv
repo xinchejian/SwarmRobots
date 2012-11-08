@@ -1,0 +1,34 @@
+Item Package Type Quantity
+MCU TQFP ATMEGA168PA-AU 1
+MOTOR-DRIVER MFP14S LB1836M 1
+CRISTAL " EIA3528" 12M 1
+Ferrite-bead 0805 120R 1
+Ferrite-bead 0805 30R 1
+IR-LED 5mm IR-LED 1
+IR-RECEIVER TSOP NJL21V400A 4
+LED 0805 blue 1
+LED 0805 green 1
+LED 0805 orange 4
+LED 5mm PWR-LED 1
+Pin-header 2.54mm 1X40 1
+Pin-header 2.54mm 2X10 1
+Pin-socket 2.54mm 1X02 3
+Pin-socket 2.54mm 1X04 4
+Pin-socket 2.54mm 1X08 2
+Pin-socket 2.54mm 1X12 2
+resistor 0805 1k 7
+resistor 0805 220R 1
+resistor 0805 10K 1
+resistor 0805 47R 5
+capacitor 0805 0.1uF 7
+capacitor 0805 22p 2
+capacitor 1206 22uF 4
+Tantalum-capacitor EIA3528 47uF 1
+TRANSISTOR SOT-23 S9013 3
+Jumper-Cap  1X2 1
+Li-Battery 300mA  1
+Motor  J9xx 2
+Screw  "M2*5（according to thick of wheel）" 2
+Screw-washer  M2*5*0.5 2
+wheel  "18mm<Diameter < 25mm" 2
+Card-board  30mmX30mm 1

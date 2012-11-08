@@ -30,14 +30,23 @@
 1.
 critical resource:  RxBuf - (type is struct)
 
-main thread:   GetMessage()-> if state == RX_UNOBSTACLE || RX_MSG_OK ->SetRxBufState() -> state = RX_MSG_EMPTY
+main thread:   GetMessage()-> if state == RX_MSG_OK ->SetRxBufState() -> state = RX_MSG_EMPTY
 timer thread:  ReceiveData()-> if state == RX_MSG_EMPTY -> SetRxBufState() -> state = !RX_MSG_EMPTY
-
 $ conclude:
 1. no constraint
 
+2. message cycle quene: headindex tailindex
+ timer - write,
+ main  - read
+$ conclude: if overlap is prohibited
+1. no constraint
+
+
  */
 
+#if ( IR_POSITION_BR >= IR_RECIEVER_NUM )
+#error
+#endif
 
 
 //
@@ -68,8 +77,9 @@ IR_Sensor::IR_Sensor(uint8_t RobotID)
         RxCtrl[i].ByteCursor = 0;
         RxCtrl[i].BitCursor = IR_COMM_BITCUR_INIT;   //record start bits
         RxCtrl[i].RunPhase = IR_Phase_RXALL;
+        RxCtrl[i].PhaseFlag = true;
 
-        pinMode(RxPin[i],INPUT);
+        pinMode(RxPin[i],INPUT_PULLUP);  //INPUT_PULLUP
     }
 
     /*initialize emitter*/
@@ -80,6 +90,9 @@ IR_Sensor::IR_Sensor(uint8_t RobotID)
 
     randomSeed(millis());
     
+    /**/
+    MsgFifo.Head = QUE_CURSOR_INVALID;
+    MsgFifo.Tail = 0;
 
 }
 
@@ -100,11 +113,8 @@ void IR_Sensor::SetSendChance()
 {
     static const uint8_t SendMessageCycle = (IR_BUFF_LENTH * 8);
     uint8_t Var;
-#if _DEBUG_SENSOR
-    SendEnableCounter = 0;
-#else
-    SendEnableCounter = random(3, SendMessageCycle);  //todo
-#endif
+
+    SendEnableCounter = random(12, SendMessageCycle);  //todo
 
     TxCtrl.ByteCursor = 0;
     TxCtrl.BitCursor = IR_COMM_BITCUR_INIT;
@@ -116,17 +126,18 @@ void IR_Sensor::SetSendChance()
  */
 uint8_t IR_Sensor::SendMessage(uint8_t ReceiverID, uint8_t MessageID, uint8_t Para)
 {
-    /*use the state of 0-receiver to judge the rx-buf whether is be fetch by Messager*/
-    if ( (TX_EMPTY != TxCtrl.State) || ( RX_EMPTY != RxCtrl[0].State) )
+
+    if ( TX_EMPTY != TxCtrl.State )
     {
         return INFO_BUSY;
     }
 
     TxBuf.ReceiverID = ReceiverID;
+    TxBuf.SenderID = ROBOT_ID_SELF;
     TxBuf.MessageID = MessageID;
     TxBuf.Para = Para;
-    TxBuf.VerifyFirst = TxBuf.ReceiverID;
-    TxBuf.VerifyLast = TxBuf.Para;
+    TxBuf.Check = CaculateCheckData( (uint8_t *)&TxBuf + 1,sizeof(TxBuf) - 2 );
+
 
     SendCnt = IR_TXRX_REPEATTIMES;
     EnableSend();
@@ -134,42 +145,48 @@ uint8_t IR_Sensor::SendMessage(uint8_t ReceiverID, uint8_t MessageID, uint8_t Pa
     return SUCCESS;
 }
 
-uint8_t IR_Sensor::GetMessage(uint8_t Index, uint8_t *pSenderID, uint8_t *pMessageID, uint8_t *pPara, uint8_t *pMessageState )
+
+
+uint8_t IR_Sensor::GetMessage(IRPosition_enum *pIRLoc, IRMsgOutput_stru *pMsg )
 {
-    if ( Index >=  IR_RECIEVER_NUM )
+    uint8_t Index;
+    uint8_t State;
+    uint8_t Ret;
+
+    Ret = GetFromMsgQue( &Index );
+    if ( SUCCESS != Ret )
     {
-        return ERR_PARA;
+        return Ret;
     }
 
-    if ( TX_EMPTY != TxCtrl.State )
-    {
-        return INFO_BUSY;
-    }
+    *pIRLoc = (IRPosition_enum)Index;
 
-    *pMessageState = RxCtrl[Index].State;
-
-    if ( RX_MSG_OK == RxCtrl[Index].State )
+    if ( Index < IR_RECIEVER_NUM )
     {
-        *pSenderID = RxBuf[Index].SenderID;
-        *pMessageID = RxBuf[Index].MessageID;
-        *pPara = RxBuf[Index].Para;
-    }
+        //Data MSG
+        ASSERT_T( RX_MSG_OK == RxCtrl[Index].State );
 
-    if  ( (RX_UNOBSTACLE == RxCtrl[Index].State) || (RX_MSG_OK == RxCtrl[Index].State) )
-    {
+        pMsg->SenderID = RxBuf[Index].SenderID;
+        pMsg->MessageID = RxBuf[Index].MessageID;
+        pMsg->Para = RxBuf[Index].Para;
+        pMsg->Check = RxBuf[Index].Check;
+
         SetRxBufState( Index, RX_EMPTY );
     }
-
-
+    else  //sending data is done,  control MSG
+    {
+       ;
+    }
 
     return SUCCESS;
 }
 
 
+
+
 inline void IR_Sensor::EnableSend(void)
 {
     SetSendChance();
-    TxCtrl.TTLCounter = IR_DATA_TTL;
     TxCtrl.State = TX_READY;  //State must be set at the end of the function to avoid interrupt.
 }
 
@@ -186,6 +203,7 @@ inline void IR_Sensor::SendData(void)
     uint8_t &ByteCur = TxCtrl.ByteCursor;
     uint8_t &BitCur = TxCtrl.BitCursor;
     uint8_t * pBuf = NULL;
+    uint8_t Ret;
 
     if (TX_DONE == TxCtrl.State)
     {
@@ -195,13 +213,17 @@ inline void IR_Sensor::SendData(void)
 
         if ( 0 == SendCnt )
         {
-            AdjustRxStateAfterSend();
-            TxCtrl.State = TX_EMPTY;
+            TxCtrl.State = TX_EMPTY;  //这里可以保证发送完毕且所有的接受器都接受完毕后，才会置空，起到了对临界区rxbuf的保护
+
+            /*Send ctl msg: a frame of msgs is end*/
+            (void)PutToMsgQue( IR_POSITION_CTL );
         }
         else
         {
             EnableSend();
         }
+
+        return;
     }
 
     if (TX_EMPTY == TxCtrl.State)
@@ -214,7 +236,6 @@ inline void IR_Sensor::SendData(void)
         SendEnableCounter --;
         return;
     }
-
 
     if ( TX_READY == TxCtrl.State )
     {
@@ -279,11 +300,19 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
     uint8_t &BitCur = RxCtrl[Index].BitCursor;
     uint8_t &ByteCur = RxCtrl[Index].ByteCursor;
     uint8_t &Phase = RxCtrl[Index].RunPhase;
+    bool &PhaseFlag = RxCtrl[Index].PhaseFlag;
+    uint8_t Val;
+
+    if ( false == PhaseFlag )
+    {
+        PhaseFlag = true;
+        return;
+    }
 
     PinVal = digitalRead( RxPin[Index] );
 
     /*if the robot receive anyting(0) from others do initalize sending window */
-    if ( ((TX_EMPTY == TxCtrl.State) || (TX_READY == TxCtrl.State)) && (LOW == PinVal) )
+    if ( (TX_READY == TxCtrl.State) && (LOW == PinVal) )
     {
         SetSendChance();
     }
@@ -291,14 +320,22 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
     /*receive start bits. if there is the first start bit, to record the sample phase*/
     if ( RX_EMPTY == BufState )
     {
+      
         if ( LOW == PinVal )
         {
-            Phase = PhaseCur;   //if (IR_Phase_RXALL == Phase)
+            if ( IR_COMM_BITCUR_INIT == BitCur )
+            {
+                Val = PhaseCur + SAMPLE_OFFSET;
+                Phase = (Val >= SAMPLE_TIMES) ? 0 : Val;
+
+                PhaseFlag = false;
+            }
+
             ++BitCur;
         }
         else
         {
-            Phase = IR_Phase_RXALL;  // if (IR_Phase_RXALL != Phase)
+            Phase = IR_Phase_RXALL;
             BitCur = IR_COMM_BITCUR_INIT;
         }
 
@@ -310,6 +347,7 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
     else if ( RX_RECEIVING == BufState )
     {
         uint8_t *pBuf = NULL;
+
         pBuf = (uint8_t *)&RxBuf[Index];
 
         bitWrite( pBuf[ByteCur], BitCur, PinVal );
@@ -326,7 +364,8 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
         {
             RXBufState_enum State;
 
-            State = (VerifyData( Index )) ? RX_MSG_OK : RX_EMPTY;
+            State = VerifyRecData( Index ) ? RX_MSG_OK : RX_EMPTY;
+            //State = RX_MSG_OK;  //todo ??
             SetRxBufState( Index, State );
         }
     }
@@ -335,7 +374,7 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
         //nothing
     }
 
-#if _DEBUG_SENSOR
+#if _DEBUG_SENSOR_NOTIMER
     Serial.print("Rev bit:");
     Serial.print("index=");
     Serial.print(Index);
@@ -352,18 +391,6 @@ inline void IR_Sensor::ReceiveData( uint8_t Index )
 }
 
 
-inline void IR_Sensor::AdjustRxStateAfterSend()
-{
-    uint8_t i;
-
-    for( i=0; i<IR_RECIEVER_NUM; ++i )
-    {
-        if ( RX_EMPTY == RxCtrl[i].State )
-        {
-            SetRxBufState( i, RX_UNOBSTACLE );
-        }
-    }
-}
 
 
 inline void IR_Sensor::SetRxBufState( uint8_t Index, uint8_t State )
@@ -371,9 +398,7 @@ inline void IR_Sensor::SetRxBufState( uint8_t Index, uint8_t State )
     uint8_t &BufState = RxCtrl[Index].State;
     uint8_t &BitCur = RxCtrl[Index].BitCursor;
     uint8_t &ByteCur = RxCtrl[Index].ByteCursor;
-    uint8_t &TTLCnt = RxCtrl[Index].TTLCounter;
-
-    BufState = State;
+    uint8_t Ret;
 
     switch( State )
     {
@@ -381,53 +406,94 @@ inline void IR_Sensor::SetRxBufState( uint8_t Index, uint8_t State )
             BitCur = IR_COMM_BITCUR_INIT;
             RxCtrl[Index].RunPhase = IR_Phase_RXALL;
             ByteCur = 0;
+
             break;
 
         case RX_RECEIVING:
             BitCur = 0;
             ByteCur++;
+
             break;
 
         case RX_MSG_OK:
-        case RX_UNOBSTACLE:
-            TTLCnt = IR_DATA_TTL;
+            Ret = PutToMsgQue( Index );
+            if ( SUCCESS != Ret )
+            {
+                BitCur = IR_COMM_BITCUR_INIT;
+                RxCtrl[Index].RunPhase = IR_Phase_RXALL;
+                ByteCur = 0;
+                
+                State = RX_EMPTY;
+            }
+
             break;
 
         default:
-            ;//error
+            ASSERT_T(0);  //error
     }
-}
-
-
-inline bool IR_Sensor::VerifyData( uint8_t Index )
-{
-    bool rslt;
-    RxBuf_stru &Buf = RxBuf[Index];
     
-    rslt = (Buf.ReceiverID == Buf.VerifyFirst) && (Buf.Para == Buf.VerifyLast) && (0xFF != Buf.VerifyLast);
+    BufState = State;   //RxCtrl is critical source, use RxCtrl.state as a signal, it must be put the last!
 
-    //todo: if receiveID is not ALL or SELF, to empty the rx buff
-
-    return rslt;
 }
 
-/*todo: when sending data, if colliding occurs, should?
- *
- *
- *
- */
 
-/* TTL
- * void TTLCaculate();
- *
- *
- */
-inline void IR_Sensor::TTLCaculate()
+uint8_t IR_Sensor::CaculateCheckData( uint8_t * pData, uint8_t ByteLen )
 {
+    ASSERT_T( NULL != pData );
 
+    uint8_t Sum, i;
 
-    // if RxBuff ttl is reached, BuffState is set to EMPTY
+    Sum = 0xAA;
+    for ( i = 0; i < ByteLen; ++i )
+    {
+        Sum = Sum ^ pData[i];
+    }
+
+    return Sum;
 }
+
+bool IR_Sensor::VerifyRecData( uint8_t Index )
+{
+    uint8_t CheckData;
+
+
+    CheckData = CaculateCheckData( (uint8_t *)&RxBuf[Index] + 1,sizeof(RxBuf[Index]) - 2 );
+
+    if ( CheckData != RxBuf[Index].Check )
+    {
+#if _DEBUG_SENSOR_NOTIMER
+    Serial.print("Rec Check:");
+    Serial.print(RxBuf[Index].Check,HEX);
+    Serial.print(" Calc Check:");
+    Serial.println(CheckData,HEX);
+#endif
+        return false;
+    }
+
+
+
+    if (ROBOT_ID_SELF == RxBuf[Index].SenderID )
+    {  //using near detecting
+        ;
+    }
+    else
+    {
+        uint8_t &ReceiverID = RxBuf[Index].ReceiverID;
+
+        if ( (ROBOT_ID_SELF == ReceiverID) || ( ROBOT_ID_ANY == ReceiverID ) )
+        {
+            ;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 
 uint32_t IR_Sensor::GetTimerFrequency(void)
 {
@@ -438,13 +504,45 @@ uint32_t IR_Sensor::GetTimerFrequency(void)
  *
  */
 
+#if _DEBUG_TIMER
+
+IRTimerTest_stru gIRTimerTest={0,0};
+
+uint16_t gTimerPeriodBegin = 0;
+uint16_t gTimerPeriodEnd = 0;
+
+uint8_t gThread = (1000000/SAMPLE_TIMES/COMM_FREQUENCY) >> 2;
+
+#endif
+
 void IR_Sensor::TimerProc()
 {
     uint8_t Phase;
     uint8_t i;
 
+#if _DEBUG_TIMER
+        gIRTimerTest.Who = 0;
+        for ( i = 0; i < IR_RECIEVER_NUM; ++i )
+        {
+            Phase = RxCtrl[i].RunPhase;
+            if ( (IR_Phase_RXALL == Phase) || (PhaseCur == Phase) )
+            {
+                gIRTimerTest.Who |= 0x1 << i;
+            }
+        }
+
+        Phase = TxCtrl.RunPhase;
+
+        if ( Phase == PhaseCur )
+        {
+            gIRTimerTest.Who |= 0b10000;
+        }
+        
+    gTimerPeriodBegin = (uint16_t)micros();
+#endif
+
     /*receive data*/
-    for ( i = 0; i < IR_RECIEVER_NUM; ++i ) 
+    for ( i = 0; i < IR_RECIEVER_NUM; ++i ) //
     {
         Phase = RxCtrl[i].RunPhase;
         if ( (IR_Phase_RXALL == Phase) || (PhaseCur == Phase) )
@@ -460,7 +558,150 @@ void IR_Sensor::TimerProc()
     {
         SendData();
     }
+    
+    PhaseCur ++;
 
-    PhaseCur = (PhaseCur >= SAMPLE_TIMES) ? 0 : ++PhaseCur;
+    if (PhaseCur >= SAMPLE_TIMES) 
+    {
+       PhaseCur = 0;
+    }
+
+#if _DEBUG_TIMER
+    uint8_t Val;
+
+    gTimerPeriodEnd = (uint16_t)micros();
+
+    Val = (gTimerPeriodEnd - gTimerPeriodBegin) >> 2;
+
+    if ( Val > gIRTimerTest.Period )
+    {
+        gIRTimerTest.Period = Val;
+    }
+
+    if ( Val >= gThread ) gIRTimerTest.Cnt++;
+#endif
 }
+
+uint8_t IR_Sensor::PutToMsgQue(uint8_t Index)
+{
+    uint8_t &Head = MsgFifo.Head;
+    uint8_t &Tail = MsgFifo.Tail;
+    uint8_t LastTail, Val;
+
+    if ( Tail == Head )
+    {
+        return INFO_QUE_FULL;
+    }
+
+    MsgFifo.aData[Tail] = Index;
+
+    LastTail = Tail;
+
+    Val = Tail;
+    Val++;
+    Tail = (Val >= IR_MSG_QUE_NUM) ? 0 : Val;  //to avoid division for efficence.
+
+    if ( QUE_CURSOR_INVALID == Head )   //to assure the 'Tail' is present unused rec before assignment to 'Head'.
+    {
+        Head = LastTail;
+    }
+
+    return SUCCESS;
+}
+
+/*GetFromQueGet in main thread, it may be interrupted by PutToMsgQue*/
+uint8_t IR_Sensor::GetFromMsgQue(uint8_t *pIndex)
+{
+    uint8_t &Head = MsgFifo.Head;
+    uint8_t &Tail = MsgFifo.Tail;
+    uint8_t Val;
+
+
+    if ( QUE_CURSOR_INVALID == Head )
+    {
+        return INFO_QUE_EMPTY;
+    }
+
+    *pIndex = MsgFifo.aData[Head];
+
+    Val = Head;  //must use temporary varible to reduce the critical region of "Head".  To aviod 'Head == Tail' when Head is increased
+    Val++;
+    Val = (Val >= IR_MSG_QUE_NUM) ? 0 : Val;  //to avoid division for efficence.
+
+    /*critical code; if unprotected, a message is maybe lost */
+    noInterrupts();  
+    Head = (Val == Tail) ? QUE_CURSOR_INVALID : Val;
+    interrupts();
+
+    return SUCCESS;
+
+}
+
+#if _DEBUG_SENSOR
+void IR_Sensor::PrintMsgQue()
+{
+    uint8_t Cursor = MsgFifo.Head;
+    uint8_t Tail = MsgFifo.Tail;
+    uint8_t Index, i;
+
+    Serial.print("MsgQue: H=");
+    Serial.print(Cursor);
+    Serial.print(" T=");
+    Serial.println(Tail);
+
+    for ( i = 0 ; i < IR_MSG_QUE_NUM; ++i )
+    {
+        if (QUE_CURSOR_INVALID == Cursor)  break;
+        
+        Index = MsgFifo.aData[Cursor];
+        Serial.print("Rx- I=");
+        Serial.print(Index);
+        
+        if ( Index < IR_RECIEVER_NUM )
+        {
+          Serial.print(" S=");
+          Serial.print(RxCtrl[Index].State);
+          Serial.print(" ByteC=");
+          Serial.print(RxCtrl[Index].ByteCursor);
+          Serial.print(" BitC=");
+          Serial.print(RxCtrl[Index].BitCursor);
+          Serial.print(" P=");
+          Serial.print(RxCtrl[Index].RunPhase);
+          Serial.print(" G=");
+          Serial.print(RxCtrl[Index].PhaseFlag);
+        }
+        
+        Serial.println("");
+
+        Cursor ++;
+        if ( Cursor >= IR_MSG_QUE_NUM ) Cursor = 0;
+        
+        if (Cursor ==  Tail) break;
+
+    }
+
+}
+
+void IR_Sensor::PrintCtl()
+{
+    uint8_t i;
+
+    for ( i = 0 ; i < IR_RECIEVER_NUM; ++i )
+     {
+           Serial.print(" S=");
+           Serial.print(RxCtrl[i].State);
+           Serial.print(" ByteC=");
+           Serial.print(RxCtrl[i].ByteCursor);
+           Serial.print(" BitC=");
+           Serial.print(RxCtrl[i].BitCursor);
+           Serial.print(" P=");
+           Serial.print(RxCtrl[i].RunPhase);
+           Serial.print(" G=");
+           Serial.print(RxCtrl[i].PhaseFlag);
+           Serial.println("");
+     }
+
+}
+
+#endif
 

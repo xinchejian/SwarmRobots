@@ -6,8 +6,9 @@
 #include "Messager.h"
 #include "Motor.h"
 
+
 #if _DEBUG
-#define _DEBUG_ACTION 0
+#define _DEBUG_ACTION 1
 #endif
 
 /*   */
@@ -16,46 +17,96 @@
 //S-Step = Small Step = one step of motor = one third of Big Step (avoid colliding)
 #define BIGSTEP_TIMES 8
 
+// InteriorInfoID_enum is used as index of a array
 typedef enum
 {
-   INNERIOR_ID_BEGIN,    // must be the fisrt
-   MOVE_FORWARD_BIGSTEP,
-   MOVE_BACKWARD_BIGSTEP,
-   INNERIOR_ID_END             // CONDITION_END must be the last
-}IneriorInfoID_enum;
+    ROBOT_TYPE,       //state: always INFO_STATE_TRUE
+    TASK_STAGE,       //Para: used as TTLcnt  state: LOOKINGFOOD FOUNDFOOD GETFOOD LOOKINGPOWER FOUNDPOWER ...
+    IS_ENVINFO,       //
+    IS_ACTION_MOVE,   //
+    IS_MOVING,        //
+    IS_REPEAT_SWING,  //state: false true
+    IS_BIGSTEP,       // state: false true
+    TARGET_NEXT,      //paraA: RobotID;  state: NULL SET ARRIVED  .
+    WEIGHT,           //para: uint8_t ; state:always INFO_STATE_TRUE
+    POWER,            //state: FULL SHORT EMPTY
+    TIMER,            //paraA: COUNTER;  state: false true
+    INNERIOR_ID_END
+}InteriorInfoID_enum;
 
-#define ACTION_INERIORINFO_NUM ( INNERIOR_ID_END - INNERIOR_ID_BEGIN )  //it must equal to ExteriorInfo_enum
+
+typedef enum
+{
+    INFO_STATE_FALSE,
+    INFO_STATE_TRUE,
+    INFO_STATE_EMPTY,
+    INFO_STATE_SET,
+    INFO_STATE_ARRIVED,
+    INFO_STATE_FULL,
+    INFO_STATE_SHORT,
+    
+    TS_INIT = 0x80,
+    TS_FOUNDFOOD,
+    TS_GETFOOD,
+    TS_POWER,
+    TS_LOOKINGPOWER,
+    TS_FOUNDPOWER,
+    TS_ANY,
+    
+    INFO_STATE_END
+}InteriorInfoState_enum;
+
+enum
+{
+    MOVE_TARGET,
+    MOVE_WALKAROUND
+};
+
+
+#define ACTION_INTERIORINFO_NUM  INNERIOR_ID_END  //it must equal to ExteriorInfo_enum
 
 typedef struct
 {
-    bool State;
-}IneriorInfoRec_stru;
+    uint8_t Para;
+    InteriorInfoState_enum State;
+}InteriorInfoRec_stru;
 
 /*  */
 typedef enum
 {
-    EXTERIORINFO,
+    ENVINFO,
     INTERIORINFO
 }InfoType_enum;
 
 typedef enum
 {
     ACTION_NONE,
-    ACTION_JUMP,
-    ACTION_MOVE,
-    ACTION_SENDMSG
+
+    ACTION_FLOW_STOP,
+
+    ACTION_IN_SET,
+
+    ACTION_EXT_MOVE,
+    ACTION_EXT_SENDMSG,
+    ACTION_EXT_FINISH
+
 }ActionID_enum;
 
 typedef struct RuleRec
 {
-    InfoType_enum InfoType;
-    uint8_t InfoID;
-    uint8_t InfoState;
+    InfoType_enum InfoType;//  ENVINFO   |      INTERIORINFO
+    uint8_t InfoID;        //  RobotID   |   InteriorInfoID_enum
+    uint8_t InfoPara;     //   MsgID    |   Para
     uint8_t ActionID;
-    uint8_t ParaA;
-    uint8_t ParaB;
+    uint8_t ActParaA;
+    uint8_t ActParaB;
 }RuleRec_stru;
 
+typedef struct MoveRule
+{
+    MTMovDir_enum Direction;
+    uint8_t Para;
+}MoveRule_stru;
 
 
 
@@ -66,15 +117,24 @@ private:
     BiMotor &Wheels;
     Messager_cls &Messager;
 
-    IneriorInfoRec_stru IneriorInfoTbl[ACTION_INERIORINFO_NUM];
+    InteriorInfoRec_stru InteriorInfoTbl[ACTION_INTERIORINFO_NUM];
     static RuleRec_stru RuleTbl[];
+    static RuleRec_stru TimerRuleTbl[];
+    static RuleRec_stru PreRuleTbl[];
+    static RuleRec_stru PostRuleTbl[];
 
-    void AnalyzeRule( uint8_t StartIndex, uint8_t *pActionID, uint8_t *pParaA, uint8_t *pParaB );
-    void LocateRuleIndex( uint8_t InfoType, uint8_t InfoID, uint8_t *pLocatedIndex );
-    void ExecuteAction( uint8_t ActionID, uint8_t ParaA, uint8_t ParaB );
+    uint8_t RuleNum, TimerRuleNum, PreRuleNum, PostRuleNum;
 
-    inline void SetIneriorInfo( uint8_t InfoID, uint8_t State );
-    inline void GetIneriorInfo( uint8_t InfoID, uint8_t *pState );
+    void InteriorInfoUpdate();
+    void ActionRule( RuleRec_stru *pTbl, uint8_t RuleNum );
+
+    void ActionSendMsg( uint8_t RobotID, uint8_t MsgID );
+    void ActionMove( uint8_t );
+    void ActionFinish();
+    void ExecuteMove( uint8_t Direct );
+
+    inline void SetInteriorInfo( uint8_t InfoID, uint8_t State );
+    inline void GetInteriorInfo( uint8_t InfoID, uint8_t *pState, uint8_t *pPara = NULL );
 
 protected:
 
@@ -82,6 +142,7 @@ protected:
 public:
     Action_cls(IR_Sensor &, BiMotor &, Messager_cls &);
     void ActionProc();
+    void TimerProc();
 };
 
 #endif
