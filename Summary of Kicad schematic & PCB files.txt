@@ -1,3 +1,7 @@
+2012-11-25 This file is now just for historical use - it now lenger matches current structure!
+
+
+
 The following is a history of Schematic & PCB files, extracted from the git commit log.
 
 5/6/12   swarmrobot 			- Schematic & PCB
