@@ -1,0 +1,33 @@
+名称;Item;Package;Type;Quantity
+MCU;MCU;TQFP;ATMEGA328P-AU;1
+电机驱动;MOTOR DRIVER;MFP14S;LB1836M;1
+晶振;CRISTAL; EIA3528 (TXC-7A);16M;1
+大电流磁珠;Ferrite bead;0805;大电流磁珠 300R 1.5A;2
+红外发射管;IR-LED ;5mm;IR-LED;1
+一体化红外接收管;IR-RECEIVER ;TSOP;NJL21V400A;4
+LED;LED;0805;green;2
+LED;LED;0805;orange;4
+LED;LED;5mm;red LED 红色;1
+排针;Pin header;间距2.54mm 针长12mm;1X40;0.5
+排针;Pin header;间距2.54mm  针长12mm;2X40;0.1
+排针;Pin header;间距2.54mm;90度 1X40;0.2
+排母;Pin socket;2.54mm;1X08;3
+排母;Pin socket;2.54mm;1X12;2
+电阻;resistor;0805;100K  (1/100precision);1
+电阻;resistor;0805;33K (1/100precision);1
+电阻;resistor;0805;1k;7
+电阻;resistor;0805;150R;2
+电阻;resistor;0805;10K;1
+电阻;resistor;0805;47R;4
+瓷电容;capacitor;0805;0.1uF;6
+瓷电容;capacitor;0805;22p;2
+瓷电容;capacitor;1206;22uF;5
+钽电容;tantalum capacitor;EIA3528;47uF;1
+带保护板锂电池;Li Battery ;Larger than 180mA;3cmX2cm;1
+小拨动开关;小拨动开关;8mm*4mm 柄5mm;SS-12D0;1
+Motor 微型直流减速电机;Motor 微型直流减速电机;;J9xx;2
+Screw 平头螺丝;Screw 平头螺丝;;M2*8;2
+wheel 皮带轮;wheel 皮带轮;橙色或白色;17*4*1.9;2
+垫片;垫片;O型;inter diameter 2.5 mm;2
+O型圈密封圈;O型圈密封圈;;外径15，线径2;2
+硬纸片;Card board;30mmX30mm; 比如牙膏包装盒，不透光;1
