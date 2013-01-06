@@ -1,0 +1,21 @@
+#only used for V2.0
+##############################################################
+
+atmega168p12m.name=ATmega168p 3.6V 12M/2048B btloader
+
+atmega168p12m.upload.protocol=arduino
+atmega168p12m.upload.maximum_size=14336
+atmega168p12m.upload.speed=115200
+
+atmega168p12m.bootloader.low_fuses=0xff
+atmega168p12m.bootloader.high_fuses=0xdd
+atmega168p12m.bootloader.extended_fuses=0x00
+atmega168p12m.bootloader.path=optiboot
+atmega168p12m.bootloader.file=optiboot_atmega168p12m.hex
+atmega168p12m.bootloader.unlock_bits=0x3F
+atmega168p12m.bootloader.lock_bits=0x0F
+
+atmega168p12m.build.mcu=atmega168p
+atmega168p12m.build.f_cpu=12000000L
+atmega168p12m.build.core=arduino
+atmega168p12m.build.variant=standard
