@@ -1,2 +1,1 @@
-V2.0版本安装指导，约60M， 获取方法： http://vdisk.weibo.com/s/iS7he/1353849824
-V2.1版本安装指导，约11M， 获取方法： http://t.cn/zjnE2Ej
+V2.1:   https://skydrive.live.com/redir?resid=2B9CFF6D7DE5D891!106&authkey=!APcqGdOVx675RZY
