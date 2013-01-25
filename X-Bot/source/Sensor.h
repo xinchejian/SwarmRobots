@@ -159,6 +159,7 @@ class IR_Sensor {
     uint8_t PhaseCur;
 
     uint8_t IRPower;
+    bool isDetectObstacle;
 
     inline void SendBit(bool BitVal);
     void SetSendChance();

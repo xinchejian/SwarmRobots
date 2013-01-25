@@ -13,7 +13,7 @@
 #define LED_INFO_L SCK  //SCK
 #define LED_INFO_R 3
 
-/*Bellow is also used as the indicator of IR receiver; So they only can be used as self-check and gameover-phase */
+/*Below is also used as the indicator of IR receiver; So they only can be used as self-check and gameover-phase */
 #define LED_FL_PIN A3
 #define LED_FR_PIN A2
 #define LED_BL_PIN A0

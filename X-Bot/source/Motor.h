@@ -1,3 +1,9 @@
+/*****
+ * Direction based on the steering direction. you is the driver.
+ *
+ *
+ *****/
+
 #ifndef Motor_h
 #define Motor_h
 
@@ -8,10 +14,8 @@
 #endif
 
 
-#define MOTOR_L_EN_PIN 9     //to control the speed by PWM(connecting to LM EN pin)
 #define MOTOR_L_DIRPINA 7  //The control direction pin of left motor (connecting to LM 1A pin)
 #define MOTOR_L_DIRPINB 6
-#define MOTOR_R_EN_PIN 9
 #define MOTOR_R_DIRPINA 4
 #define MOTOR_R_DIRPINB 5
 
@@ -25,7 +29,7 @@
 /* Near Distance = the distance of near detecting = as 1.5 times as lenth of robot, on the condition of suggest material
  */
 
-#define MT_STEP_ONE 400   // 2cm
+#define MT_STEP_ONE 800   // 400 for 0.5cm
 
 #define MT_ROTATE_ONE 400  // 10degre  180degree = 18*350
 
@@ -33,17 +37,23 @@
 
 #define MT_DEGREE(a) ((a)/MT_ANGEL_UNIT)
 
+#define REPEATED_STEP_THRESHOLD 8
+#define REPEATED_ROTATE_THRESHOLD 37
+#define PINGPANG_ROTATE_THRESHOLD 3  // It must be lager than 2
+
+#if (PINGPANG_ROTATE_THRESHOLD < 3)
+#error
+#endif
+
 typedef enum
 {
-    MT_MOV_NULL,
     MT_STOP,
     MT_FORWARD,
     MT_BACKWARD,
     MT_CLOCKWISE,
     MT_ANTICLOCK,
-    MT_CLOCKRANDOM,   //compoud moving
-    MT_SWING
-
+    MT_TURNLEFT,   //One wheel is fixed, one is forward.
+    MT_TURNRIGHT
 }MTMovDir_enum;
 
 
@@ -92,17 +102,19 @@ private:
 
     MTMovDir_enum LastMoveDirection;  //only base direction: MT_FORWARD,MT_BACKWARD,MT_CLOCKWISE,MT_ANTICLOCK,MT_STOP
     uint8_t LastMovePara;
-    uint8_t ContinueFowardCnt;
+
+    bool StepRepeatState;
+    bool RotateRepeatState;
+    bool RotatePingPangState;
 
 
     inline void Run();
     inline void Stop();
     inline void SetSpeed( MTSpeed_enum Speed );
-    inline void SetMoveDistance( uint8_t Distance );
-    inline void SetRotateAngle( uint8_t Angle );
 
-    inline void Walk( MTMovDir_enum Direction, uint8_t Distance = 1, MTSpeed_enum Speed = MT_SPEED_NORMAL );
-    inline void Rotate( MTMovDir_enum Direction, uint8_t Angle = 9, MTSpeed_enum Speed = MT_SPEED_NORMAL );
+    inline void Walk( MTMovDir_enum Direction, uint8_t Distance = 1 );
+    inline void Rotate( MTMovDir_enum Direction, uint8_t Angle = 9 );
+    void Statistic( MTMovDir_enum Direction, uint8_t Para );
 
     void SetSingleMotorAction( uint8_t Index, MTSingleAct_enum Action );
 
@@ -111,8 +123,13 @@ protected:
 
 public:
     BiMotor();
-    void Move( MTMovDir_enum Direction, uint8_t Para );
+    void Move( MTMovDir_enum Direction, uint8_t Para, MTSpeed_enum Speed = MT_SPEED_NORMAL );
+
     bool isMoving();
+    bool isStepRepeat();
+    bool isRotateRepeat();
+    bool isRotatePingPang();
+
     void GetMoveAciton( MTMovDir_enum &Direction, uint8_t &Para );
     void TimerProc();
 };

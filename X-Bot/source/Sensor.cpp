@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Contract: leo.yan.cn@gmail.com
+    Contact: leo.yan.cn@gmail.com
 */
 
 #include "Arduino.h"
@@ -163,8 +163,8 @@ void IR_Sensor::SetSendChance()
     SendEnableCounter = random(16, SendMessageCycle);  //todo
 }
 
-/*
- *IRPowerTenth < 30
+/*If the IRPower is less than (IR_POWER_OBSTACLE_LEASTTEHTH/10 * IR_POWER_DUTY), it cannot be used as to detect obstacles.
+ *IRPowerTenth < 3
  *
  */
 uint8_t IR_Sensor::SendMessage(uint8_t ReceiverID, uint8_t MessageID, uint8_t Para, uint8_t IRPowerTenth)
@@ -174,6 +174,8 @@ uint8_t IR_Sensor::SendMessage(uint8_t ReceiverID, uint8_t MessageID, uint8_t Pa
     {
         return INFO_BUSY;
     }
+
+    isDetectObstacle =  (IRPowerTenth >= IR_POWER_OBSTACLE_LEASTTEHTH) ? true : false;
 
     IRPower = ((uint16_t)IRPowerTenth * IR_POWER_DUTY)/10;
 
@@ -260,10 +262,12 @@ inline void IR_Sensor::SendData(void)
 
         if ( 0 == SendCnt )
         {
-            TxCtrl.State = TX_EMPTY;  //这里可以保证发送完毕且所有的接受器都接受完毕后，才会置空，起到了对临界区rxbuf的保护
-
-            /*Send ctl msg: a frame of msgs is end*/
-            (void)PutToMsgQue( IR_POSITION_CTL );
+            TxCtrl.State = TX_EMPTY;  //这里可以保证发送完毕且所有的接收器都接受完毕后，才会置空，起到了对临界区rxbuf的保护
+            if ( isDetectObstacle )
+            {
+                /*Send ctl msg: a frame of msgs is end*/
+                (void)PutToMsgQue( IR_POSITION_CTL );
+            }
         }
         else
         {

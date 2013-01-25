@@ -16,11 +16,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Contract: leo.yan.cn@gmail.com
+    Contrat: leo.yan.cn@gmail.com
 */
 
 /*assumption:
- * now it is based on Arduino UNO (ATMega 328)
+ * now based on Arduino UNO (ATMega 328)
  *
  */
 
@@ -55,8 +55,6 @@ Messager_cls Messager( IRSensor, Wheels );
 Action_cls Action( IRSensor, Wheels, Messager );
 
 
-
-
 void setup() {
 
     
@@ -69,7 +67,7 @@ void setup() {
     LedLight.SetLed(LED_MODE_START);
 
     /*initialization of PWM, It is used for IR-LED */
-    IRSensor.InitFrequence(40000);  //why? if it is set in the construct of IRSensor, it failed
+    IRSensor.InitFrequence(40000);  //why? if it is set in the constructor of IRSensor, it will fail
     
 #if !_DEBUG_SENSOR_NOTIMER
     TimerInit();
@@ -78,19 +76,23 @@ void setup() {
 #if ( _START_TEST && !_DEBUG)
     uint8_t i;
     /**Test motor.  F B L R**/
-    for (i = 1; i < MT_CLOCKRANDOM; ++i)
-    {
-        Wheels.Move((MTMovDir_enum) i, 9);
-        delay(2000);
-    }
 
+    Wheels.Move(MT_FORWARD, 9);
+    delay(2000);
+    Wheels.Move(MT_BACKWARD, 9);
+    delay(2000);    
+    Wheels.Move(MT_CLOCKWISE, MT_DEGREE(90));
+    delay(2000);
+    Wheels.Move(MT_ANTICLOCK, MT_DEGREE(90));
+    delay(2000);
+    
     /**Test IR**/
     digitalWrite( LED_INFO_L , HIGH );
     digitalWrite( LED_INFO_R , HIGH );
 
     for (i = 0; i < 100; ++i)
     {
-        delay(200);
+        delay(100);
         IRSensor.SendMessage( 0xEE, 0xAA, 0x88 );
     }
 
@@ -99,10 +101,8 @@ void setup() {
 
 #endif
 
-    delay(200);
 
-
-#if !_DEBUG
+#if ( _START_REMOTE_CONTROL && !_DEBUG )
     uint8_t Cnt = 0;
 
     do
@@ -158,6 +158,7 @@ void loop()
 void DebugProcess()
 {
     static uint8_t Cnt = 0;
+    uint8_t i;
 
 #if _DEBUG_SENSOR
     uint8_t Ret;
@@ -203,7 +204,7 @@ void DebugProcess()
 
 
 #if _DEBUG_MT
-    uint8_t i;
+
 
     for (i = 1; i < MT_CLOCKRANDOM; ++i) {
         Serial.print("Move to: ");
@@ -220,6 +221,7 @@ void DebugProcess()
 
 #if _DEBUG_MS
     uint8_t Info;
+    uint8_t NearRobotID;
     
 #if !_DEBUG_ACTION
 
@@ -233,6 +235,20 @@ void DebugProcess()
         Messager.GetEnvObstacleInfo( &Info );
         Serial.print("Obstacle: ");
         Serial.println(Info, HEX);
+
+        Serial.print("NearR: ");
+        for ( i = 0; i < POSITION_NUM; ++i )
+        {
+            NearRobotID = Messager.GetEnvNearRobot((TargetPos_enum)i);
+            if ( ROBOT_ID_NONE != NearRobotID )
+            {
+                Serial.print(i);
+                Serial.print("=");
+                Serial.print(NearRobotID, HEX);
+            }
+
+        }
+        Serial.println("");
 
         Messager.ShowEnvRobotInfo();
 
@@ -272,9 +288,9 @@ void DebugProcess()
 #endif
 
 /* Thread of Timer
- *1, The frequence is based on the requirment of IR-Sensor.
- *2, TimerProc can be called at this interrupt.  The TimerProc must short.
- *3, It produce a pulse at the 200 milisecond and 1 second. The width of pulse is 100 ms
+ *1, The frequency is based on the requirements of the IR-Sensor.
+ *2, TimerProc can be called at this interrupt.  The TimerProc must be short.
+ *3, It produces a pulse at the 200 milliseconds and 1 second. The width of the pulse is 100 ms
  */
 
 void TimerInterruptHandler()

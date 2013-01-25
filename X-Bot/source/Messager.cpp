@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Contract: leo.yan.cn@gmail.com
+    Contact: leo.yan.cn@gmail.com
 */
 
 
@@ -43,6 +43,11 @@ Messager_cls::Messager_cls(IR_Sensor &MySensor, BiMotor &Wheels):MsgSrc(MySensor
     InfoManager.RobotInfoOldRec = 0;
     InfoManager.SearchIndex = 0;
     
+    for ( i = 0; i < POSITION_NUM; ++i )
+    {
+        InfoManager.NearRobot[i] = ROBOT_ID_NONE;
+    }
+
     for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
     {
         ClrEnvInfoMsg(&(InfoManager.RobotInfo[i]));
@@ -92,8 +97,6 @@ void Messager_cls::MessageProc()
             Serial.print(IRMsg.MessageID);
             Serial.print(" P=");
             Serial.print(IRMsg.Para);
-            Serial.print(" V=");
-            Serial.print(IRMsg.Check);
         }
         Serial.println("");
     }
@@ -131,7 +134,7 @@ inline void Messager_cls::SetEnvRobotInfo( IRMsgOutput_stru &Msg, IRPosition_enu
     Para = Msg.Para;
 
     /*todo: maybe receive many times for a msg, all the info will be combine, so the position is not accurate, expecially in rotating with large angle*/
-    /*if the record has been stored and than to refresh the record*/
+    /*if the record has been stored and then to refresh the record*/
     pRobotInfo = InfoManager.RobotInfo;
 
     for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
@@ -149,7 +152,7 @@ inline void Messager_cls::SetEnvRobotInfo( IRMsgOutput_stru &Msg, IRPosition_enu
     }
 
     /*if no matched record, to occupy the oldest or blank record*/
-    if ( ENVROBOT_INFOTBL_NUM == i )
+    if ( ENVROBOT_INFOTBL_NUM <= i )
     {
         Index = OldRec;
     }
@@ -161,15 +164,22 @@ inline void Messager_cls::SetEnvRobotInfo( IRMsgOutput_stru &Msg, IRPosition_enu
 
     pRobotInfo->RobotID = SenderID;
 
-    /**Deal with special MSG**/
+    /**Deal with special MSG, broadcast msg**/
     if ( MSGID_SELFTYPE == MessageID )
     {
         pRobotInfo->Type = Para;
     }
-    else
+    else if ( MSGID_NEARRANGE == MessageID )
+    {
+        pRobotInfo->Near = NEARRANGE_TTL;
+    }
+    else //single-cast msg
     {
         pRobotInfo->MsgID = MessageID;
-        pRobotInfo->Para = Para;
+        if ( INVALID != Para )
+        {
+            pRobotInfo->Para = Para;
+        }
     }
 
     bitSet(pRobotInfo->Position,IRLoc);
@@ -213,10 +223,11 @@ inline void Messager_cls::ClrEnvInfoMsg( EnvRobotInfoRec_stru *pRobotInfo )
     }
     pRobotInfo->TTLCnt = 0;
     pRobotInfo->MsgID = MSGID_INVALID;
-    pRobotInfo->Para = 0;
+    pRobotInfo->Para = INVALID;
     pRobotInfo->Position = 0;
     pRobotInfo->LocAngle = INVALID;
     pRobotInfo->FaceAngle = INVALID;
+    pRobotInfo->Near = 0;
 }
 
 
@@ -261,23 +272,19 @@ void Messager_cls::CalibrateEnvInfo( )
         pRobotInfo = InfoManager.RobotInfo;
         for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
         {
-            if ( (0 < pRobotInfo->TTLCnt) && (INVALID != pRobotInfo->LocAngle) )
+            if ( 0 < pRobotInfo->TTLCnt )
             {
-                pRobotInfo->LocAngle += DeltaAngle;
-                pRobotInfo->LocAngle = pRobotInfo->LocAngle%(360/MT_ANGEL_UNIT);
-                if ( pRobotInfo->LocAngle > (180/MT_ANGEL_UNIT) )
+                if (INVALID != pRobotInfo->LocAngle)
                 {
-                    pRobotInfo->LocAngle -= (360/MT_ANGEL_UNIT);
-                }
-                else if ( pRobotInfo->LocAngle < -(180/MT_ANGEL_UNIT))
-                {
-                    pRobotInfo->LocAngle += (360/MT_ANGEL_UNIT);
-                }
-                else
-                {
-                    //nothing
+                    pRobotInfo->LocAngle += DeltaAngle;
+                    pRobotInfo->LocAngle = pRobotInfo->LocAngle%( MT_DEGREE(360) );
                 }
 
+                if (INVALID != pRobotInfo->FaceAngle)
+                {
+                    pRobotInfo->FaceAngle += DeltaAngle;
+                    pRobotInfo->FaceAngle = pRobotInfo->FaceAngle%( MT_DEGREE(360) );
+                }
             }
 
             pRobotInfo++;
@@ -295,21 +302,22 @@ void Messager_cls::CalibrateEnvInfo( )
 */
 void Messager_cls::RefreshEnvInfo()
 {
-    uint8_t i;
+    uint8_t i, j;
     EnvRobotInfoRec_stru *pRobotInfo = NULL;
 
     static TargetToAngle_stru aTagetPriority[] = {
-            {TARGET_POS_F, 0},
-            {TARGET_POS_L, 90/MT_ANGEL_UNIT},
-            {TARGET_POS_R, -90/MT_ANGEL_UNIT},
-            {TARGET_POS_B, 180/MT_ANGEL_UNIT},
-            {TARGET_POS_FL, 20/MT_ANGEL_UNIT},   //rotate half angle
-            {TARGET_POS_FR, -20/MT_ANGEL_UNIT},
-            {TARGET_POS_BL, 110/MT_ANGEL_UNIT},
-            {TARGET_POS_BR, -110/MT_ANGEL_UNIT }, };
+            { TARGET_POS_F, MT_DEGREE(0) },
+            { TARGET_POS_L, MT_DEGREE(90) },
+            { TARGET_POS_R, MT_DEGREE(270) },
+            { TARGET_POS_B, MT_DEGREE(180) },
+            { TARGET_POS_FL, MT_DEGREE(20) },
+            { TARGET_POS_FR, MT_DEGREE(340) },
+            { TARGET_POS_BL, MT_DEGREE(110) },
+            { TARGET_POS_BR, MT_DEGREE(200) }, };
 
     RefreshPos( InfoManager.ObstacleInfo, MS_OR );
 
+    /**Calculate the robot angle**/
     pRobotInfo = InfoManager.RobotInfo;
     for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
     {
@@ -321,15 +329,27 @@ void Messager_cls::RefreshEnvInfo()
             /*If receive msg than update the LocAngle, otherwise calibrate the LocAngle according to Move*/
             if ( 0 != pRobotInfo->Position )
             {
-                for ( i = 0; i < POSITION_NUM; ++i )
+                for ( j = 0; j < POSITION_NUM; ++j )
                 {
-                    if ( 1 == bitRead( pRobotInfo->Position, (uint8_t)aTagetPriority[i].Direction) )
+                    if ( 1 == bitRead( pRobotInfo->Position, (uint8_t)aTagetPriority[j].Direction) )
                     {
-                        pRobotInfo->LocAngle = aTagetPriority[i].Angle;
+                        pRobotInfo->LocAngle = aTagetPriority[j].Angle;
                         break;
                     }
                 }
+
                 pRobotInfo->Position = 0;
+
+                /**calculate the faceangle**/
+                uint8_t S2T_Angle, T2S_Angle;
+                T2S_Angle = pRobotInfo->Para;
+                if ( INVALID != T2S_Angle )
+                {
+                    S2T_Angle = pRobotInfo->LocAngle;
+                    S2T_Angle = ( S2T_Angle < MT_DEGREE(180) ) ? (S2T_Angle + MT_DEGREE(180)) : (S2T_Angle - MT_DEGREE(180));
+
+                    pRobotInfo->FaceAngle = ( S2T_Angle >= T2S_Angle ) ? (S2T_Angle - T2S_Angle) : (MT_DEGREE(360)+S2T_Angle-T2S_Angle);
+                }
             }
             else
             {
@@ -340,7 +360,40 @@ void Messager_cls::RefreshEnvInfo()
         pRobotInfo++;
     }
 
+
+    RefreshNearRobot();
 }
+
+inline void Messager_cls::RefreshNearRobot()
+{
+    uint8_t i;
+    TargetPos_enum Position;
+    EnvRobotInfoRec_stru *pRobotInfo = NULL;
+
+    for ( i = 0; i < POSITION_NUM; ++i )
+    {
+        InfoManager.NearRobot[i] = ROBOT_ID_NONE;
+    }
+
+    pRobotInfo = InfoManager.RobotInfo;
+    InfoManager.RobotAsObstacle = 0;
+
+    for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
+    {
+        if ( (0 < pRobotInfo->TTLCnt) && ( 0 < pRobotInfo->Near) )
+        {
+            Position = GetLocationfromAngle( pRobotInfo->LocAngle );
+            InfoManager.NearRobot[Position] = pRobotInfo->RobotID;
+
+            bitSet(InfoManager.RobotAsObstacle, Position);
+        }
+
+        pRobotInfo++;
+    }
+
+    RefreshPos( InfoManager.RobotAsObstacle, MS_OR );
+}
+
 
 void Messager_cls::RefreshPos(uint8_t &Position, Logic_enum Logic)
 {
@@ -386,7 +439,7 @@ void Messager_cls::QueryTimeProc( uint8_t TimeOn100ms)
 
     static uint8_t LastTime = 0;
 
-    if ( (unsigned uint8_t)( TimeOn100ms - LastTime) < MSG_QUERYTIMER_T )
+    if ( (uint8_t)( TimeOn100ms - LastTime) < MSG_QUERYTIMER_T )
     {
         return;
     }
@@ -407,6 +460,14 @@ void Messager_cls::QueryTimeProc( uint8_t TimeOn100ms)
             {
                 ClrEnvInfoMsg(pRobotInfo);
             }
+            else if ( 0 < pRobotInfo->Near )
+            {
+                pRobotInfo->Near--;
+            }
+            else
+            {
+                //nothing
+            }
         }
 
         pRobotInfo++;
@@ -419,16 +480,18 @@ bool Messager_cls::IsEnvInfoValid( )
     return InfoManager.Valid;
 }
 
+
 /*If there are many records meeting the condition, it will return the record than its Para is the most.
  * If the Paras are same, it will return the newest record*/
-uint8_t Messager_cls::GetEnvRobotInfo( uint8_t RobotID, uint8_t Para, EnvRobotInfoRec_stru &OutInfo )
+uint8_t Messager_cls::GetEnvRobotInfo( uint8_t InfoKind, uint8_t RobotID, uint8_t Para, EnvRobotInfoRec_stru &OutInfo )
 {
     uint8_t i;
-    uint8_t MsgID, Type, Index;
+    uint8_t Index;
+    bool Flag;
     uint8_t &StartIndex = InfoManager.SearchIndex;
     EnvRobotInfoRec_stru *pRobotInfo = NULL;
 
-
+    Flag = false;
     for ( i = 0; i < ENVROBOT_INFOTBL_NUM; ++i )
     {
         Index = (StartIndex + i)%ENVROBOT_INFOTBL_NUM;
@@ -436,50 +499,60 @@ uint8_t Messager_cls::GetEnvRobotInfo( uint8_t RobotID, uint8_t Para, EnvRobotIn
 
         if ( 0 < pRobotInfo->TTLCnt )
         {
+            switch ((RobotInfoKind_enum)InfoKind)
+            {
+            case ROBOTINFO_MSG:
+                if ( ((pRobotInfo->RobotID == RobotID) || (ROBOT_ID_ANY == RobotID))
+                        &&  ((pRobotInfo->MsgID == Para) || (MSGID_ANY == Para)) )
+                {
+                    Flag = true;
+                }
+                break;
 
-            if ( (pRobotInfo->RobotID == RobotID) || (ROBOT_ID_ANY == RobotID) )
-            {
-                MsgID = Para;
-                if ( (pRobotInfo->MsgID == MsgID) || (MSGID_ANY == MsgID) )
+            case ROBOTINFO_TYPE:
+                if ( Para == pRobotInfo->Type )
                 {
-                    break;
+                    Flag = true;
                 }
-            }
-            else if ( ROBOT_ID_TYPE == RobotID)
-            {
-                Type = Para;
-                if ( Type == pRobotInfo->Type )
+                break;
+
+            case ROBOTINFO_NEAR:
+                if ( (pRobotInfo->RobotID == RobotID) || (ROBOT_ID_ANY == RobotID) )
                 {
-                    break;
+                    Flag =  (pRobotInfo->Near > 0) ? Para : !Para;
                 }
-            }
-            else if ( ROBOT_ID_LESS == RobotID )
-            {
-                MsgID = Para;
+                break;
+
+            case ROBOTINFO_MSG_LESSID:
                 if ( (pRobotInfo->RobotID < ROBOT_ID_SELF)
-                        && ((pRobotInfo->MsgID == MsgID) || (MSGID_ANY == MsgID)) )
+                        && ((pRobotInfo->MsgID == Para) || (MSGID_ANY == Para)) )
                 {
-                    break;
+                    Flag = true;
                 }
-            }
-            else
-            {
-                ;
+                break;
+
+            default:
+                ASSERT_T(0);
+
             }
 
         }
 
+        if ( Flag )
+        {
+            break;
+        }
+
     }
 
-    if ( i >= ENVROBOT_INFOTBL_NUM )
+    if ( !Flag )
     {
         return INFO_REC_NONE;
     }
-    
-    StartIndex = (Index + 1)%ENVROBOT_INFOTBL_NUM;
-    pRobotInfo = InfoManager.RobotInfo + Index;
 
     OutInfo = *pRobotInfo;
+    
+    StartIndex = (Index + 1)%ENVROBOT_INFOTBL_NUM;
 
     return SUCCESS;
 }
@@ -487,6 +560,16 @@ uint8_t Messager_cls::GetEnvRobotInfo( uint8_t RobotID, uint8_t Para, EnvRobotIn
 void Messager_cls::GetEnvObstacleInfo( uint8_t *pInfo )
 {
     *pInfo = InfoManager.ObstacleInfo;
+}
+
+void Messager_cls::GetRobotAsObstacleInfo( uint8_t *pInfo )
+{
+    *pInfo = InfoManager.RobotAsObstacle;
+}
+
+uint8_t Messager_cls::GetEnvNearRobot( TargetPos_enum Position )
+{
+    return InfoManager.NearRobot[Position];
 }
 
 void Messager_cls::GetEnvStatistic( uint8_t MsgID, uint8_t Para, uint8_t *pRslt )
@@ -504,7 +587,7 @@ void Messager_cls::GetEnvStatistic( uint8_t MsgID, uint8_t Para, uint8_t *pRslt 
         {
             if ( MsgID == pRobotInfo->MsgID )
             {
-                *pRslt++;
+                (*pRslt)++;
             }
         }
 
@@ -512,6 +595,41 @@ void Messager_cls::GetEnvStatistic( uint8_t MsgID, uint8_t Para, uint8_t *pRslt 
     }
 }
 
+TargetPos_enum Messager_cls::GetLocationfromAngle( int8_t Angle )
+{
+    uint8_t i, Num;
+    TargetPos_enum Location;
+
+    static AngleToDirection_stru aAngleToDirection[] =
+    {
+        {MT_DEGREE(0), MT_DEGREE(10), TARGET_POS_F},
+        {MT_DEGREE(10), MT_DEGREE(80), TARGET_POS_FL},
+        {MT_DEGREE(80), MT_DEGREE(100), TARGET_POS_L},
+        {MT_DEGREE(100), MT_DEGREE(170), TARGET_POS_BL},
+        {MT_DEGREE(170), MT_DEGREE(190), TARGET_POS_B},
+        {MT_DEGREE(190), MT_DEGREE(260), TARGET_POS_BR},
+        {MT_DEGREE(260), MT_DEGREE(280), TARGET_POS_R},
+        {MT_DEGREE(280), MT_DEGREE(350), TARGET_POS_FR},
+        {MT_DEGREE(350), MT_DEGREE(360), TARGET_POS_F},
+    };
+
+    ASSERT_T( Angle <= MT_DEGREE(360) );
+
+    Location = TARGET_POS_F;
+    Num = sizeof(aAngleToDirection)/sizeof(aAngleToDirection[0]);
+
+    for ( i = 0; i < Num; ++i )
+    {
+        if ( (Angle >= aAngleToDirection[i].AngleB)
+                && (Angle <= aAngleToDirection[i].AngleE) )
+        {
+            Location = aAngleToDirection[i].Direction;
+            break;
+        }
+    }
+
+    return Location;
+}
 
 #if _DEBUG_MS
 void Messager_cls::ShowEnvRobotInfo()
@@ -547,6 +665,8 @@ void Messager_cls::ShowEnvRobotInfo()
             Serial.print( pRobotInfo->LocAngle );
             Serial.print(" FaceA=");
             Serial.print( pRobotInfo->FaceAngle );
+            Serial.print(" Near=");
+            Serial.print( pRobotInfo->Near );
             Serial.print(" TTL=");
             Serial.println( pRobotInfo->TTLCnt );
         }
@@ -565,15 +685,15 @@ void Messager_cls::ShowEnvRobotInfo()
 #if 0
 
 /*table constraint:
- * the first uint8_t colum must be used to identify the validation of record.  NUll means empty.
- * the following colums must be KEY,
+ * the first uint8_t colum must be used to identify the validation of record.  NULL means empty.
+ * the following columns must be KEY,
  * */
 typedef struct TblCtrl
 {
     uint8_t MaxRec;     //
-    uint8_t RecLen;     //the lenth of a record, uint:byte
+    uint8_t RecLen;     //the length of a record, uint:byte
     uint8_t KeyByteNum;    // the byte numbers of the key, uint:byte
-    uint8_t EmptyIndex;  // an empty row that can be availible right now.
+    uint8_t EmptyIndex;  // an empty row that can be available right now.
 }TblCtrl_stru;
 
 #define MS_MESSAGETBL_NUM 16

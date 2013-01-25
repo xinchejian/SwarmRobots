@@ -10,15 +10,15 @@
 #endif
 
 
-/* TODO: the more 1 bits, the more less power */
+/* TODO: the more 1 bits, the lower the power */
 typedef enum
 {
-    MSGID_INVALID = ROBOT_TYPE_END, // ROBOT_TYPE is also used as NOTIFY,
-    MSGID_NOTIFY_IFINDYOU,    //NOTIFY: not need to respond, eg. phenomone info.
-    MSGID_NOTIFY_TOBUILD,     // It's para: next id of robot
-    MSGID_NOTIFY_TOFOOD,     // It's para: next id of robot(phenomone)
-    MSGID_NOTIFY_TOHOME,     //It's para: next id of robot(phenomone)
-    MSGID_NOTIFY_DONE,     //It's para: next id of robot(phenomone)
+    MSGID_INVALID,
+    MSGID_NOTIFY_IFINDYOU,    //NOTIFY: not need to respond, eg. pheromone info.
+    MSGID_NOTIFY_TOBUILD,     // It's param: next id of robot
+    MSGID_NOTIFY_TOFOOD,     // It's param: next id of robot(phenomone)
+    MSGID_NOTIFY_TOHOME,     //It's param: next id of robot(phenomone)
+    MSGID_NOTIFY_DONE,     //It's param: next id of robot(phenomone)
     MSGID_REQUEST,
     MSGID_RESPONCE,
     MSGID_ACK,
@@ -30,7 +30,7 @@ typedef enum
 
 typedef enum
 {
-    TARGET_POS_FL = IR_POSITION_FL,
+    TARGET_POS_FL = IR_POSITION_FL,  //must equal 0
     TARGET_POS_FR = IR_POSITION_FR,
     TARGET_POS_BL =IR_POSITION_BL,
     TARGET_POS_BR = IR_POSITION_BR,
@@ -45,6 +45,7 @@ typedef enum
 
 #define ENVROBOT_INFOTBL_NUM POSITION_NUM  //should not be less than POSITION_NUM
 #define MSG_TTL ( ENVROBOT_INFOTBL_NUM * 2 )
+#define NEARRANGE_TTL ( ENVROBOT_INFOTBL_NUM )
 
 typedef enum
 {
@@ -52,17 +53,14 @@ typedef enum
     MS_OR
 }Logic_enum;
 
-typedef struct EnvRobotInfoRec
+typedef enum
 {
-    uint8_t RobotID;  //key
-    uint8_t Type;
-    uint8_t MsgID;
-    uint8_t Para;
-    uint8_t Position; // store the location tmperorily.  use bit value is TargetPos_enum, POSITION_INVALID
-    int8_t LocAngle; //The location angle of target to myself
-    int8_t FaceAngle; //The Face of Target to myself
-    uint8_t TTLCnt;
-}EnvRobotInfoRec_stru;
+    ROBOTINFO_MSG,
+    ROBOTINFO_TYPE,
+    ROBOTINFO_NEAR,
+    ROBOTINFO_MSG_LESSID,
+    ROBOTINFO_END
+}RobotInfoKind_enum;
 
 typedef struct TargetToAngle
 {
@@ -70,10 +68,27 @@ typedef struct TargetToAngle
     int8_t Angle;
 }TargetToAngle_stru;
 
+
+typedef struct EnvRobotInfoRec
+{
+    uint8_t RobotID;  //key
+    uint8_t Type;
+    uint8_t MsgID;
+    uint8_t Para;
+    uint8_t Position; // store the location tmperorily.  use bit value is TargetPos_enum
+    uint8_t LocAngle; //The location angle of target to myself
+    uint8_t FaceAngle; //The Face of Target to myself
+    uint8_t Near;  //if > 0, Near;
+    uint8_t TTLCnt;
+}EnvRobotInfoRec_stru;
+
+
 typedef struct EnvInfoManager
 {
     bool Valid;
     uint8_t ObstacleInfo; //use bit.  TargetPos_enum
+    uint8_t RobotAsObstacle; //use bit.  from near Robot
+    uint8_t NearRobot[ENVROBOT_INFOTBL_NUM];  //eight location; first element is ID
 
     uint8_t RobotInfoOldRec;  //store the index of the oldest record or blank record
     uint8_t SearchIndex;  //define the start index when seaching record in order to prevent from finding the the same record
@@ -88,6 +103,12 @@ typedef struct
     TargetPos_enum InSecond;
 }PosRefreshRec_stru;
 
+typedef struct AngleToDirection
+{
+    int8_t AngleB;
+    int8_t AngleE;
+    TargetPos_enum Direction;
+}AngleToDirection_stru;
 
 
 class Messager_cls
@@ -101,6 +122,7 @@ private:
     inline void MsgToEvnInfo( IRMsgOutput_stru &Msg, IRPosition_enum IRLoc );
     inline void SetEnvRobotInfo( IRMsgOutput_stru &Msg, IRPosition_enum IRLoc );
     void RefreshEnvInfo();
+    inline void RefreshNearRobot();
     void CalibrateEnvInfo();
     void RefreshPos(uint8_t &Position, Logic_enum);
     inline void ClrEnvInfoMsg(EnvRobotInfoRec_stru *);
@@ -114,11 +136,14 @@ public:
     Messager_cls( IR_Sensor &, BiMotor &);
     void MessageProc();
     bool IsEnvInfoValid();
-    uint8_t GetEnvRobotInfo( uint8_t RobotID, uint8_t Para, EnvRobotInfoRec_stru &OutInfo );
+    uint8_t GetEnvRobotInfo( uint8_t InfoKind, uint8_t RobotID, uint8_t Para, EnvRobotInfoRec_stru &OutInfo );
     void GetEnvObstacleInfo( uint8_t *pInfo );
+    void GetRobotAsObstacleInfo( uint8_t *pInfo );
+    uint8_t GetEnvNearRobot(TargetPos_enum);
     void ClrEnvInfoLoc();
 
     void GetEnvStatistic( uint8_t MsgID, uint8_t Para, uint8_t *pRslt );
+    TargetPos_enum GetLocationfromAngle( int8_t Angle );
 
     #if _DEBUG_MS
     void ShowEnvRobotInfo();

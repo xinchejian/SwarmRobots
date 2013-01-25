@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Contract: leo.yan.cn@gmail.com
+    Contact: leo.yan.cn@gmail.com
 */
 
 #include "Arduino.h"
@@ -32,18 +32,15 @@
 
 RuleRec_stru Action_cls::RuleTbl[] =
 {
-    {INTERIORINFO, TASK_STAGE, TS_INIT,  0, 0, 0,  true },
-    {INTERIORINFO, POWER, INFO_STATE_FULL,  ACTION_IN_SET, TASK_STAGE, TS_LOOKING,  false },
-
     {INTERIORINFO, TASK_STAGE, TS_LOOKING,  0, 0, 0,  true},
     {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B00,  true},
-    {ENVINFO, ROBOT_ID_TYPE, ROBOT_TYPE_POWERSTATION,  ACTION_IN_SET, TARGET, INFO_STATE_SET,  true},
-    {ENVINFO, ROBOT_ID_TYPE, ROBOT_TYPE_POWERSTATION,  ACTION_IN_SET, TASK_STAGE, TS_FOUND,  false},
+    {ROBOTINFO_TYPE, ROBOT_ID_ANY, ROBOT_TYPE_FOOD,  ACTION_IN_SET, TARGET, INFO_STATE_SET,  true},
+    {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_FOUND,  false},
 
     {INTERIORINFO, TASK_STAGE, TS_FOUND,  0, 0, 0,  true},
     {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B01,  true},
-    {INTERIORINFO, TARGET, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_LOOKING,  false},
-    {ENVINFO, ROBOT_ID_TARGET, MSGID_NEARRANGE,  ACTION_IN_SET, TASK_STAGE, TS_CLOSED,  false},
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, true,  ACTION_IN_SET, COUNTER, 0,  true},
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, true,  ACTION_IN_SET, TASK_STAGE, TS_CLOSED,  false},
     {ANYINFO, 0, 0,  ACTION_EXT_MOVE, MOVE_TARGET, 0,  false },
 
 
@@ -63,7 +60,14 @@ RuleRec_stru Action_cls::RuleTbl[] =
 
 RuleRec_stru Action_cls::TimerRuleTbl[] = {};
 
-RuleRec_stru Action_cls::PreRuleTbl[] = {};
+RuleRec_stru Action_cls::PreRuleTbl[] = {
+    {INTERIORINFO, TASK_STAGE, TS_INIT,  0, 0, 0,  true },
+    {ANYINFO, 0, 0,  ACTION_IN_SET, TASK_STAGE, TS_LOOKING,  false },
+
+    {INTERIORINFO, TASK_STAGE, TS_ANY,  0, 0, 0, true },
+    {INTERIORINFO, TARGET, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_LOOKING,  false},
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, false,  ACTION_IN_SET, TASK_STAGE, TS_FOUND,  false},
+};
 
 RuleRec_stru Action_cls::PostRuleTbl[] =
 {
@@ -82,43 +86,48 @@ RuleRec_stru Action_cls::PostRuleTbl[] =
  */
 RuleRec_stru Action_cls::RuleTbl[] =
 {
-    {INTERIORINFO, TASK_STAGE, TS_INIT,  0, 0, 0,  true },
-    {ANYINFO, 0, 0,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
-//
     {INTERIORINFO, TASK_STAGE, TS_Lonely,  0, 0, 0,  true},
     {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B00,  true},
-    {ENVINFO, ROBOT_ID_ANY, MSGID_ACK,  ACTION_IN_SET, FOLLOWER, INFO_STATE_SET, true},
+    {ROBOTINFO_MSG, ROBOT_ID_ANY, MSGID_ACK,  ACTION_IN_SET, FOLLOWER, INFO_STATE_SET, true},
     {INTERIORINFO, FOLLOWER, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_BeFollowed,  false},
 
-    {ENVINFO, ROBOT_ID_ANY, MSGID_RESPONCE, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_ACK, true},
-    {ENVINFO, ROBOT_ID_ANY, MSGID_RESPONCE,  ACTION_IN_SET, TARGET, INFO_STATE_SET, true},
-    {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_Following,  false},
+    {ROBOTINFO_MSG, ROBOT_ID_ANY, MSGID_RESPONCE, ACTION_IN_SET, TARGET, INFO_STATE_SET, true},
+    {INTERIORINFO, TARGET, INFO_STATE_SET, ACTION_EXT_SENDMSG, ROBOT_ID_TARGET, MSGID_ACK, true},
+    {INTERIORINFO, TARGET, INFO_STATE_SET, ACTION_IN_SET, TASK_STAGE, TS_Following,  false},
 
-    {ENVINFO, ROBOT_ID_LESS, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
+    {ROBOTINFO_MSG_LESSID, ROBOT_ID_ANY, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
     {ANYINFO, 0, 0,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_REQUEST,  false},
 //
     {INTERIORINFO, TASK_STAGE, TS_BeFollowed,  0, 0, 0,  true},
     {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B01,  true},
     {INTERIORINFO, FOLLOWER, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
 
-    {ENVINFO, ROBOT_ID_ANY, MSGID_RESPONCE, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_ACK, true},
-    {ENVINFO, ROBOT_ID_ANY, MSGID_RESPONCE,  ACTION_IN_SET, TARGET, INFO_STATE_SET, true},
+    {ROBOTINFO_MSG, ROBOT_ID_ANY, MSGID_RESPONCE,  ACTION_IN_SET, TARGET, INFO_STATE_SET, true},
+    {INTERIORINFO, TARGET, INFO_STATE_SET, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_ACK, true},
     {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_BeNode,  false},
 
-    {ENVINFO, ROBOT_ID_FOLLOWER, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
-    {ANYINFO, 0, 0,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_REQUEST,  false},
+    {ROBOTINFO_MSG, ROBOT_ID_FOLLOWER, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
+    {ANYINFO, 0, 0,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_REQUEST,  true},
+    {ROBOTINFO_NEAR, ROBOT_ID_FOLLOWER, false,  ACTION_EXT_MOVE, MOVE_SWING, 3, false },
+
+    {ROBOTINFO_NEAR, ROBOT_ID_FOLLOWER, true,  ACTION_IN_SET, COUNTER, 0,  true},
+    {INTERIORINFO, COUNTER, 15,  ACTION_EXT_MOVE, MOVE_SWING, 3,  false},  //if next is not Game Over, shout set the state to false
+    {ROBOTINFO_NEAR, ROBOT_ID_FOLLOWER, false,  ACTION_IN_INCR, COUNTER, 0,  false},
+
 //
     {INTERIORINFO, TASK_STAGE, TS_Following,  0, 0, 0,  true},
     {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B10,  true},
     {INTERIORINFO, TARGET, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
 
-    {ENVINFO, ROBOT_ID_ANY, MSGID_ACK,  ACTION_IN_SET, FOLLOWER, INFO_STATE_SET, true},
+    {ROBOTINFO_MSG, ROBOT_ID_ANY, MSGID_ACK,  ACTION_IN_SET, FOLLOWER, INFO_STATE_SET, true},
     {INTERIORINFO, FOLLOWER, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_BeNode,  false},
 
-    {ENVINFO, ROBOT_ID_LESS, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
+    {ROBOTINFO_MSG_LESSID, ROBOT_ID_ANY, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
     {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_EXT_SENDMSG, ROBOT_ID_TARGET, MSGID_ACK,  true},
 
-    {INTERIORINFO, TARGET, INFO_STATE_ARRIVED,  ACTION_EXT_MOVE, MOVE_STOP, 0,  false },  //stop
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, false,  ACTION_IN_SET, COUNTER, 0,  true},
+    {INTERIORINFO, COUNTER, 6,  ACTION_EXT_MOVE, MOVE_SWING, 3,  false},  //if next is not Game Over, shout set the state to false
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, true,  ACTION_IN_INCR, COUNTER, 0,  true},
     {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_EXT_MOVE, MOVE_TARGET, 0,  false },
 
 //
@@ -127,10 +136,12 @@ RuleRec_stru Action_cls::RuleTbl[] =
     {INTERIORINFO, FOLLOWER, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_Following,  false },
     {INTERIORINFO, TARGET, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_BeFollowed,  false },
 
-    {ENVINFO, ROBOT_ID_FOLLOWER, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
+    {ROBOTINFO_MSG, ROBOT_ID_FOLLOWER, MSGID_REQUEST, ACTION_EXT_SENDMSG, ROBOT_ID_SOURCE, MSGID_RESPONCE, false},
     {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_EXT_SENDMSG, ROBOT_ID_TARGET, MSGID_ACK,  true},
 
-    {INTERIORINFO, TARGET, INFO_STATE_ARRIVED,  ACTION_EXT_MOVE, MOVE_STOP, 0,  false },  //stop
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, false,  ACTION_IN_SET, COUNTER, 0,  true},
+    {INTERIORINFO, COUNTER, 6,  ACTION_EXT_MOVE, MOVE_SWING, 3,  false},  //if next is not Game Over, shout set the state to false
+    {ROBOTINFO_NEAR, ROBOT_ID_TARGET, true,  ACTION_IN_INCR, COUNTER, 0,  true},
     {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_EXT_MOVE, MOVE_TARGET, 0,  false },
 };
 
@@ -140,9 +151,8 @@ RuleRec_stru Action_cls::TimerRuleTbl[] ={};
 
 RuleRec_stru Action_cls::PreRuleTbl[] =
 {
-    {INTERIORINFO, TASK_STAGE, TS_ANY,  0, 0, 0 },
-    {INTERIORINFO, IS_MOVING, INFO_STATE_TRUE,  ACTION_NONE, 0, 0,  false },
-    {INTERIORINFO, IS_ENVINFO, INFO_STATE_FALSE,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_SELFTYPE,  false },
+    {INTERIORINFO, TASK_STAGE, TS_INIT,  0, 0, 0,  true },
+    {ANYINFO, 0, 0,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
 };
 
 RuleRec_stru Action_cls::PostRuleTbl[] =
@@ -151,14 +161,50 @@ RuleRec_stru Action_cls::PostRuleTbl[] =
     {INTERIORINFO, IS_ACTION_MOVE, INFO_STATE_FALSE,  ACTION_EXT_MOVE, MOVE_WALKAROUND, 0, false },
 };
 
-#elif ( ROBOT_TYPE_POWERSTATION == ROBOT_INIT_TYPE )
+
+
+#elif ( ROBOT_TYPE_ANT_SAMEDIRECTION == ROBOT_INIT_TYPE )
+RuleRec_stru Action_cls::RuleTbl[] =
+{
+    {INTERIORINFO, TASK_STAGE, TS_Lonely,  0, 0, 0,  true},
+    {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B00,  true},
+    {ROBOTINFO_MSG_LESSID, ROBOT_ID_ANY, MSGID_ANY,  ACTION_IN_SET, TARGET, INFO_STATE_SET,  true},
+//    {ROBOTINFO_TASKSTATE, TS_Lonely, false,  ACTION_IN_SET, TARGET, INFO_STATE_SET,  true},
+    {INTERIORINFO, TARGET, INFO_STATE_SET,  ACTION_IN_SET, TASK_STAGE, TS_FOUND,  false},
+
+    {INTERIORINFO, TASK_STAGE, TS_FOUND,  0, 0, 0,  true},
+    {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_MANUAL, 0B01,  true},
+    {INTERIORINFO, TARGET, INFO_STATE_EMPTY,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
+    {ANYINFO, 0, 0,  ACTION_IN_INCR, COUNTER, 0,  true},
+    {INTERIORINFO, COUNTER, 8,  ACTION_EXT_MOVE, MOVE_KEEPANGLE, MT_DEGREE(0),  true},
+    {INTERIORINFO, COUNTER, 8,  ACTION_IN_SET, COUNTER, 0,  false},
+};
+
+RuleRec_stru Action_cls::TimerRuleTbl[] ={};
+
+RuleRec_stru Action_cls::PreRuleTbl[] =
+{
+    {INTERIORINFO, TASK_STAGE, TS_INIT,  0, 0, 0,  true },
+    {ANYINFO, 0, 0,  ACTION_IN_SET, TASK_STAGE, TS_Lonely,  false },
+
+    {INTERIORINFO, TASK_STAGE, TS_ANY,  0, 0, 0, true },
+    {ANYINFO, 0, 0,  ACTION_EXT_SENDMSG, ROBOT_ID_POLLING, MSGID_NOTIFY_IFINDYOU, false },
+};
+
+RuleRec_stru Action_cls::PostRuleTbl[] =
+{
+    {INTERIORINFO, TASK_STAGE, TS_ANY,  0, 0, 0, true },
+    {INTERIORINFO, IS_ACTION_MOVE, INFO_STATE_FALSE,  ACTION_EXT_MOVE, MOVE_STOP, 1, false },
+};
+
+
+#elif ( ROBOT_TYPE_FOOD == ROBOT_INIT_TYPE )
 
 RuleRec_stru Action_cls::RuleTbl[] =
 {
     {INTERIORINFO, TASK_STAGE, TS_INIT,   0, 0, 0, true },
-    {ANYINFO, 0, 0,  ACTION_IN_SET_PARA, COUNTER, 1, true},
     {ANYINFO, 0, 0,  ACTION_IN_SET, STATISTIC_CONDITION, CONDITION_LARGER, true},
-    {ANYINFO, 0, 0,  ACTION_IN_SET_PARA, STATISTIC_CONDITION, 2, true},   //set the arrived quantity.
+    {ANYINFO, 0, 0,  ACTION_IN_SET_PARA, STATISTIC_CONDITION, 1, true},   //set the arrived quantity.
     {ANYINFO, 0, 0,  ACTION_IN_SET, TASK_STAGE, TS_RUNNING,  false},
 
     {INTERIORINFO, TASK_STAGE, TS_RUNNING,   0, 0, 0, true },
@@ -166,8 +212,7 @@ RuleRec_stru Action_cls::RuleTbl[] =
     {INTERIORINFO, STATISTIC_STATE, INFO_STATE_TRUE,  ACTION_IN_SET, TASK_STAGE, TS_TASKOVER, false },
 
     {INTERIORINFO, TASK_STAGE, TS_TASKOVER,   0, 0, 0, true },
-    {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_GAMEWIN, 0,  true},
-    {ANYINFO, 0, 0, ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_NEARRANGE, false},
+    {ANYINFO, 0, 0,  ACTION_EXT_LED, LED_MODE_GAMEWIN, 0,  false},
 };
 
 RuleRec_stru Action_cls::TimerRuleTbl[] =
@@ -183,8 +228,6 @@ RuleRec_stru Action_cls::PreRuleTbl[] = {};
 RuleRec_stru Action_cls::PostRuleTbl[] =
 {
     {INTERIORINFO, TASK_STAGE, TS_ANY,  0, 0, 0, true },
-    {INTERIORINFO, COUNTER, 0,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_SELFTYPE,  true},
-    {INTERIORINFO, COUNTER, 1,  ACTION_EXT_SENDMSG, ROBOT_ID_ANY, MSGID_NEARRANGE,  true},
     {ANYINFO, 0, 0,  ACTION_IN_INCR, COUNTER, 0,  true},
     {INTERIORINFO, IS_ACTION_MOVE, INFO_STATE_FALSE,  ACTION_EXT_MOVE, MOVE_STOP, 0, false },  //delay time
 };
@@ -201,8 +244,6 @@ Action_cls::Action_cls(IR_Sensor &Sensor, BiMotor &Wheels, Messager_cls &Message
     InteriorInfoTbl[TASK_STAGE].State = TS_INIT;
     InteriorInfoTbl[IS_ACTION_MOVE].State = INFO_STATE_FALSE;
 
-    InteriorInfoTbl[IS_REPEAT_SWING].State = INFO_STATE_FALSE;
-    InteriorInfoTbl[IS_BIGSTEP].State = INFO_STATE_FALSE;
     InteriorInfoTbl[TARGET].State = INFO_STATE_EMPTY;
     InteriorInfoTbl[FOLLOWER].State = INFO_STATE_EMPTY;
 
@@ -217,11 +258,8 @@ Action_cls::Action_cls(IR_Sensor &Sensor, BiMotor &Wheels, Messager_cls &Message
     /*COUNTER; State = Count uumber;  Para = Threshold, if Count reach the Threshold, it will be set 0*/
     InteriorInfoTbl[COUNTER].State = 0;
     InteriorInfoTbl[COUNTER].Para = 0xFE;
-
     
     InteriorInfoTbl[STATISTIC_STATE].State = INFO_STATE_FALSE;
-
-    SetInteriorInfo( LASTMOVE, MT_FORWARD, 0 );
 
     RuleNum = sizeof(RuleTbl)/sizeof(RuleRec_stru);
     TimerRuleNum = sizeof(TimerRuleTbl)/sizeof(RuleRec_stru);
@@ -253,6 +291,7 @@ void Action_cls::ActionProc()
     GetInteriorInfo( IS_MOVING, &MovingState );
     GetInteriorInfo( IS_ENVINFO, &EnvInfoState );
 
+    //todo, is it necessary "(INFO_STATE_FALSE == MovingState)"
     if ( (INFO_STATE_FALSE == MovingState) && (INFO_STATE_FALSE == EnvInfoState) )
     {
         ExecuteSendMsg();
@@ -343,7 +382,7 @@ void Action_cls::ActionRule( RuleRec_stru *pTbl, uint8_t RecNum )
         InfoID = pTbl[i].InfoID;
         InfoPara = pTbl[i].InfoPara;
 
-        if ( ENVINFO == pTbl[i].InfoType )
+        if ( ROBOTINFO_END > pTbl[i].InfoType )
         {
             RobotID = InfoID;
 
@@ -375,20 +414,15 @@ void Action_cls::ActionRule( RuleRec_stru *pTbl, uint8_t RecNum )
                 RobotID = InPara;
             }
 
-            Ret = Messager.GetEnvRobotInfo( RobotID, InfoPara, RobotInfo);
-
-            if ( SUCCESS ==  Ret)
+            Ret = Messager.GetEnvRobotInfo( pTbl[i].InfoType, RobotID, InfoPara, RobotInfo);
+#if _DEBUG_ACTION
+            Serial.print(" GetEnv ret=");
+            Serial.println(Ret);
+#endif
+            if ( SUCCESS == Ret)
             {
                 RobotID = RobotInfo.RobotID;
                 InfoFlag = true;
-#if _DEBUG_ACTION
-            Serial.print(" GetEnv ret=");
-            Serial.print(Ret);
-            Serial.print(" BotID=");
-            Serial.print(RobotID);
-            Serial.print(" P=");
-            Serial.println(InfoPara);
-#endif
             }
 
         }
@@ -485,6 +519,15 @@ Serial.println(ActParaB);
 
                     ActParaA = InPara;
                 }
+                else if ( ROBOT_ID_FOLLOWER == ActParaA )
+                {
+                    /*If there is no target, the rule is out of date, so stop*/
+                    GetInteriorInfo( FOLLOWER, &InState, &InPara );
+                    if ( INFO_STATE_EMPTY == InState )
+                    {
+                        break;
+                    }
+                }
                 else
                 {
                     //nothing
@@ -557,7 +600,7 @@ void Action_cls::InteriorInfoUpdate()
     if ( (INFO_STATE_EMPTY != State) && (INFO_STATE_ARRIVED != State) )
     {
         MsgID = MSGID_ANY;
-        Ret = Messager.GetEnvRobotInfo( RobotID, MsgID, RobotInfo );
+        Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, RobotID, MsgID, RobotInfo );
 
         if ( SUCCESS != Ret )
         {
@@ -570,7 +613,7 @@ void Action_cls::InteriorInfoUpdate()
     if ( INFO_STATE_EMPTY != State )
     {
         MsgID = MSGID_ANY;
-        Ret = Messager.GetEnvRobotInfo( RobotID, MsgID, RobotInfo );
+        Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, RobotID, MsgID, RobotInfo );
         if ( SUCCESS != Ret )
         {
             SetInteriorInfo( FOLLOWER, INFO_STATE_EMPTY );
@@ -611,6 +654,7 @@ void Action_cls::ActionStatistic( uint8_t MsgID, uint8_t Para )
     uint8_t State, Logic, Threshold;
     /**  **/
     Messager.GetEnvStatistic( MsgID, Para, &Num );
+    
 
     /**Set interior state**/
     Logic = 0;
@@ -632,97 +676,124 @@ void Action_cls::ActionStatistic( uint8_t MsgID, uint8_t Para )
 void Action_cls::ExecuteSendMsg( )
 {
     static uint8_t Cnt = 0;
-    uint8_t RobotID, MsgID, Para;
+    static bool SpecialFlag = false;
+    uint8_t RobotID, MsgID, Para, PowerTenth;
     uint8_t InState, InPara;
+    EnvRobotInfoRec_stru RobotInfo;
+    uint8_t Ret;
+
 
     /**Special Msg must send after a while**/
     if ( (true == MsgInfo.Flag) && (Cnt < 3) )
     {
         RobotID = MsgInfo.RobotID;
         MsgID = MsgInfo.MsgID;
-        Para = MsgInfo.Para;
+        PowerTenth = 10;
+        Para = INVALID;
 
-        MsgInfo.Flag = false;
-
-        Cnt++;
-        //tmp todo
-        if ( MSGID_SELFTYPE == MsgID )
+        if ( ROBOT_ID_POLLING == RobotID )
+        {   //todo  optimize
+            Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, ROBOT_ID_ANY, MSGID_ANY, RobotInfo );
+            if ( SUCCESS == Ret )
+            {
+                RobotID = RobotInfo.RobotID;
+                Para = RobotInfo.LocAngle;
+            }
+            else
+            {
+                MsgInfo.Flag = false;
+                Cnt++;
+                return;
+            }
+        }
+        else if ( RobotID < ROBOT_ID_SPECIAL_START )
         {
-            Cnt = 0;
+            Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, RobotID, MSGID_ANY, RobotInfo );
+
+            if ( SUCCESS == Ret )
+            {
+                Para = RobotInfo.LocAngle;
+            }
         }
 
+        MsgInfo.Flag = false;
+        Cnt++;
 
     }
     else
-    {   //send self type
-        GetInteriorInfo( ROBOT_TYPE, &InState, &InPara );
+    {
+        if ( SpecialFlag )
+        {
+            GetInteriorInfo( ROBOT_TYPE, &InState, &InPara );
 
-        RobotID = ROBOT_ID_ANY;
-        MsgID = MSGID_SELFTYPE;
-        Para = InPara;
+            RobotID = ROBOT_ID_ANY;
+            MsgID = MSGID_SELFTYPE;
+            Para = InPara;
+            PowerTenth = 10;
+        }
+        else
+        {
+            RobotID = ROBOT_ID_ANY;
+            MsgID = MSGID_NEARRANGE;
+            Para = 0;
+            PowerTenth = IR_POWER_NEARTTEHTH;
+        }
 
+        SpecialFlag = !SpecialFlag;
         Cnt = 0;
     }
 
-    //tmp test todo
-    if ( MSGID_NEARRANGE == MsgID )
-    {
-        Sensor.SendMessage( RobotID, MsgID, Para, 2 );
-    }
-    else
-    {
-        Sensor.SendMessage( RobotID, MsgID, Para );
-    }
+
+
+
+    Sensor.SendMessage( RobotID, MsgID, Para, PowerTenth );
 }
 
 void Action_cls::ActionMove( uint8_t MoveType, uint8_t Para )
 {
-    uint8_t RobotID, State, MsgID;
-    uint8_t InState;
-    uint8_t Ret;
-    EnvRobotInfoRec_stru RobotInfo;
+    uint8_t RobotID, State;
+    MTMovDir_enum MTDir;
+    uint8_t Angle;
 
     if ( MOVE_WALKAROUND == MoveType )
-    {   /*Walk around*/
-        GetInteriorInfo( IS_BIGSTEP, &InState );
-
-        if ( INFO_STATE_TRUE == InState )
+    {
+        if ( true == Wheels.isStepRepeat() )
         {
-            GetInteriorInfo( LASTMOVE, &InState );
-            if (  MT_FORWARD == InState )
-            {
-                ExecuteMove( MT_CLOCKRANDOM, ANGLE_RANDOM );
-            }
-            else
-            {
-                ExecuteMove( MT_FORWARD, 1 );
-            }
+            randomSeed(millis());
+            MTDir = (0 == random(2)) ? MT_CLOCKWISE : MT_ANTICLOCK;
+            Angle = random(MT_DEGREE(60));
+
+            ExecuteMove( MTDir, Angle );
+        }
+        else if ( true == Wheels.isRotateRepeat() )
+        {
+            ExecuteMove( MT_FORWARD, 3 );
         }
         else
         {
-            MoveToDirection( 0 );
+            MoveAvoidObstacle();
         }
     }
     else if ( MOVE_TARGET == MoveType )
     {   /*Move to target*/
         GetInteriorInfo(TARGET, &State, &RobotID );
         ASSERT_T( INFO_STATE_EMPTY != State );
-        MsgID = MSGID_ANY;
 
-        Ret = Messager.GetEnvRobotInfo( RobotID, MsgID, RobotInfo );
-        if ( SUCCESS == Ret )
-        {
-            MoveToDirection( RobotInfo.LocAngle );
-        }
-
+        MoveToTarget( RobotID );
     }
     else if ( MOVE_SWING == MoveType )
     {
-        ExecuteMove( MT_SWING, Para);
+        MoveWithSwing( Para );
+    }
+    else if ( MOVE_KEEPANGLE == MoveType )
+    {
+        GetInteriorInfo(TARGET, &State, &RobotID );
+        ASSERT_T( INFO_STATE_EMPTY != State );
+        MoveKeepAngle( RobotID, Para );
     }
     else  //MOVE_STOP, only consume time
     {
-        ExecuteMove( MT_STOP, Para);;
+        ExecuteMove( MT_STOP, Para );
     }
 
     SetInteriorInfo( IS_ACTION_MOVE, INFO_STATE_TRUE );
@@ -730,10 +801,168 @@ void Action_cls::ActionMove( uint8_t MoveType, uint8_t Para )
 
 
 
-void Action_cls::MoveToDirection( int8_t Angle )
+void Action_cls::MoveWithSwing( uint8_t Para )
 {
-    static uint8_t aObstacleRule[] = { TARGET_POS_F, TARGET_POS_FL, TARGET_POS_FR, TARGET_POS_L, \
+
+    MTMovDir_enum LastMoveType, MoveType;
+    uint8_t Val;
+
+    /**when firstly rotate, the angle is half of setting.**/
+    Wheels.GetMoveAciton( LastMoveType, Val );
+    if ( (MT_CLOCKWISE != LastMoveType)
+            && (MT_ANTICLOCK != LastMoveType) )
+    {
+        Para = Para>>1;
+    }
+
+    MoveType = ( MT_CLOCKWISE == LastMoveType ) ? MT_ANTICLOCK : MT_CLOCKWISE;
+
+    ExecuteMove( MoveType, Para, false );
+
+}
+
+void Action_cls::MoveKeepAngle( uint8_t TargetID, uint8_t Angle)
+{
+    MTMovDir_enum MoveType;
+    uint8_t MoveAngle;
+    uint8_t Ret;
+
+    EnvRobotInfoRec_stru RobotInfo;
+
+    if ( Angle >= MT_DEGREE(360) )
+    {
+        ASSERT_T(0);
+        return;
+    }
+
+    Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, TargetID, MSGID_ANY, RobotInfo );
+    if ( SUCCESS != Ret )
+    {
+        ASSERT_T(0);
+        return;
+    }
+
+    if ( INVALID == RobotInfo.FaceAngle )
+    {
+        return;
+    }
+
+    MoveAngle = RobotInfo.FaceAngle + Angle;
+    MoveAngle = MoveAngle % MT_DEGREE(360);
+
+
+    if ( MoveAngle  > MT_DEGREE(180) )
+    {
+        MoveType = MT_CLOCKWISE;
+        MoveAngle =  (MT_DEGREE(360) - MoveAngle);
+    }
+    else
+    {
+        MoveType = MT_ANTICLOCK;
+    }
+    
+    if ( MoveAngle <= MT_DEGREE(20) )
+    {
+        MoveType = MT_STOP;
+        MoveAngle = 1; //become step
+    }
+    else
+    {
+        //MoveAngle/= 2; //tmp
+    }
+
+    ExecuteMove( MoveType, MoveAngle, false );
+}
+
+void Action_cls::MoveToTarget( uint8_t TagetRobotID )
+{
+    EnvRobotInfoRec_stru RobotInfo;
+    uint8_t ObstacleInfo;
+    TargetPos_enum TargetDirect;
+    MTMovDir_enum MoveDirection;
+    uint8_t NearRobotID;
+    uint8_t Para;
+    int8_t Angle;
+    uint8_t Ret;
+
+    Ret = Messager.GetEnvRobotInfo( ROBOTINFO_MSG, TagetRobotID, MSGID_ANY, RobotInfo );
+    if ( SUCCESS != Ret )
+    {
+        ASSERT_T(0);
+        return;
+    }
+
+    /* if there is a obstacle in the 'Direction', it will avoid obstacles firstly */
+    Angle = RobotInfo.LocAngle;
+    TargetDirect = Messager.GetLocationfromAngle( Angle );
+
+    NearRobotID = Messager.GetEnvNearRobot(TargetDirect);
+    Messager.GetEnvObstacleInfo( &ObstacleInfo );
+
+    if ( (( ROBOT_ID_NONE == NearRobotID )
+            || (NearRobotID == TagetRobotID))
+            && (0 == bitRead( ObstacleInfo, TargetDirect)) )
+    {
+        GetMTActionFromPosition( TargetDirect, MoveDirection, Para );
+        if ( MT_FORWARD == MoveDirection )
+        {
+            Para = 1;
+        }
+        else
+        {
+            Para = (Angle > MT_DEGREE(180) ) ? (MT_DEGREE(360) - Angle) : Angle;
+        }
+
+        ExecuteMove( MoveDirection, Para );
+    }
+    else
+    {
+        MoveAvoidObstacle();
+    }
+}
+
+
+void Action_cls::MoveAvoidObstacle()
+{
+    static TargetPos_enum aObstacleRule[] = { TARGET_POS_F, TARGET_POS_FL, TARGET_POS_FR, TARGET_POS_L, \
                                         TARGET_POS_R, TARGET_POS_BL, TARGET_POS_BR, TARGET_POS_B };
+
+    uint8_t i;
+    uint8_t Val,ObstacleInfo;
+    TargetPos_enum TargetDirect;
+    MTMovDir_enum MoveDirection;
+    uint8_t Para;
+
+    /*move to the direction where is not obstacle*/
+    Messager.GetEnvObstacleInfo( &Val );
+    ObstacleInfo = Val;
+    Messager.GetRobotAsObstacleInfo( &Val );
+    ObstacleInfo |= Val;
+
+    for ( i = 0; i < POSITION_NUM; ++i )
+    {
+        if ( 0 == bitRead( ObstacleInfo, aObstacleRule[i]) )
+        {
+            TargetDirect = aObstacleRule[i];
+            break;
+        }
+    }
+
+    if ( POSITION_NUM > i )
+    {
+        GetMTActionFromPosition( TargetDirect, MoveDirection, Para );
+    }
+    else
+    {   //obstacle in all directions  todo: maybe decrease the power of IR LED
+        MoveDirection = MT_CLOCKWISE;
+        Para = MT_DEGREE(10);  ;
+    }
+
+    ExecuteMove( MoveDirection, Para);
+}
+
+inline void Action_cls::GetMTActionFromPosition( TargetPos_enum Position, MTMovDir_enum &MTDirection, uint8_t &Para )
+{
     static MoveRule_stru aMoveRule[] =
     {
                 { MT_ANTICLOCK, MT_DEGREE(30) },//TARGET_POS_FL = IR_POSITION_FL,
@@ -745,143 +974,47 @@ void Action_cls::MoveToDirection( int8_t Angle )
                 { MT_CLOCKWISE, MT_DEGREE(90) },//TARGET_POS_R,
                 { MT_CLOCKWISE, MT_DEGREE(180) },//TARGET_POS_B    //it must be the last
     };
-    static AngleToDirection_stru aAngleToDirection[] =
-    {
-        {MT_DEGREE(-10), MT_DEGREE(10), TARGET_POS_F},
-        {MT_DEGREE(170), MT_DEGREE(180), TARGET_POS_B},
-        {MT_DEGREE(-180), MT_DEGREE(-170), TARGET_POS_B},
-        {MT_DEGREE(80), MT_DEGREE(100), TARGET_POS_L},
-        {MT_DEGREE(-100), MT_DEGREE(-80), TARGET_POS_R},
-        {MT_DEGREE(10), MT_DEGREE(80), TARGET_POS_FL},
-        {MT_DEGREE(-80), MT_DEGREE(-10), TARGET_POS_FR},
-        {MT_DEGREE(100), MT_DEGREE(170), TARGET_POS_BL},
-        {MT_DEGREE(-170), MT_DEGREE(-100), TARGET_POS_BR},
-    };
 
-    MTMovDir_enum MoveDirection;
-    uint8_t TargetDirect;
-    uint8_t Para;
-    uint8_t ObstacleInfo;
-    uint8_t i;
+    ASSERT_T( Position < POSITION_NUM );
 
-    TargetDirect = TARGET_POS_F;
-    
-    for ( i = 0; i < sizeof(aAngleToDirection)/sizeof(aAngleToDirection[0]); ++i )
+
+    MTDirection = aMoveRule[Position].Direction;
+    Para = aMoveRule[Position].Para;
+}
+
+
+
+inline void Action_cls::ExecuteMove( MTMovDir_enum MoveDirection, uint8_t MovePara, bool PreventPingPang )
+{
+#if 0
+    static uint8_t Angle = 0;
+    if ( PreventPingPang && Wheels.isRotatePingPang() )
     {
-        if ( (Angle >= aAngleToDirection[i].AngleB)
-                && (Angle <= aAngleToDirection[i].AngleE) )
+        if ( (MT_CLOCKWISE == MoveDirection) || (MT_ANTICLOCK == MoveDirection) )
         {
-            TargetDirect = aAngleToDirection[i].Direction;
-        }
-    }
-
-    /* if there is a obstacle in the 'Direction', it will avoid obstacles firstly */
-    Para = INVALID;
-    Messager.GetEnvObstacleInfo( &ObstacleInfo );
-    
-    if ( 1 == bitRead( ObstacleInfo, TargetDirect) )
-    {
-        TargetDirect = POSITION_INVALID;
-        /*move to the direction where is not obstacle*/
-        for ( i = 0; i < POSITION_NUM; ++i )
-        {
-
-            if ( 0 == bitRead( ObstacleInfo, aObstacleRule[i]) )
+            Angle = Angle/2;
+            if ( Angle < MT_DEGREE(10) )
             {
-                TargetDirect = aObstacleRule[i];
-                break;
+                MoveDirection = MT_FORWARD;
+                MovePara = 1;
+            }
+            else
+            {
+                MovePara = Angle;
             }
         }
     }
     else
     {
-        Para = (Angle >= 0 ) ? Angle : -Angle;
+        Angle = MovePara;
     }
-
-    if ( POSITION_INVALID != TargetDirect )
-    {
-        MoveDirection = aMoveRule[TargetDirect].Direction;
-        Para = (INVALID == Para) ? aMoveRule[TargetDirect].Para : Para;  //It is better to use the actural angle.
-    }
-    else
-    {   //obstacle in all directions  todo: maybe decrease the power of IR LED
-        MoveDirection = MT_CLOCKWISE;
-        Para = MT_DEGREE(10);  ;
-    }
-
-    ExecuteMove( MoveDirection, Para);
-
-}
-
-void Action_cls::ExecuteMove( MTMovDir_enum MoveDirection, uint8_t MovePara )
-{
-    uint8_t InState, InPara;
-
-    uint8_t MoveLastDirection;
-    uint8_t MoveLastPara;
-
-#if _DEBUG_ACTION
-    Serial.print("**ExeM D=");
-    Serial.print(MoveDirection);
-    Serial.print(" P=");
-    Serial.println(MovePara);
 #endif
 
     Wheels.Move( MoveDirection, MovePara);
-
-    GetInteriorInfo( LASTMOVE, &MoveLastDirection, &MoveLastPara );
-
-    /**judge IS_BIGSTEP**/
-    GetInteriorInfo( IS_BIGSTEP, &InState, &InPara );
-
-    if ( MoveLastDirection != MoveDirection )
-    {
-        InPara = 0;
-        InState = INFO_STATE_FALSE;
-    }
-    else
-    {
-        InPara++;
-    }
-
-    if ( InPara >= BIGSTEP_TIMES )
-    {
-        InPara = 0;
-        InState = INFO_STATE_TRUE;
-    }
-
-
-    SetInteriorInfo( IS_BIGSTEP, InState, InPara);
-
-    /** Todo: unuseful?? judge swing repeatly **/
-    GetInteriorInfo( IS_REPEAT_SWING, &InState, &InPara );
-
-    if ( (0 == InPara) || ( (MT_CLOCKWISE != MoveDirection) && (MT_ANTICLOCK != MoveDirection) ) )
-    {
-        InState = INFO_STATE_FALSE;
-        InPara = 0;
-    }
-    else if ( (((MT_CLOCKWISE == MoveDirection) &&  (MT_ANTICLOCK == MoveLastDirection))
-              || ((MT_ANTICLOCK == MoveDirection) &&  (MT_CLOCKWISE == MoveLastDirection)))
-            && ( MovePara == MoveLastPara ) )
-    {
-        InState = INFO_STATE_TRUE;
-        InPara = MovePara;
-
-    }
-    else
-    {
-        //nothing
-    }
-
-    SetInteriorInfo( IS_REPEAT_SWING, InState, InPara );
-
-    /** keep move state  **/
-    SetInteriorInfo( LASTMOVE, MoveDirection, MovePara );
 }
 
 /*here todo ???
- *Direct: the angle of target, unit: 10 degree */
+ *Direct: the angle of target, unit: 10 degrees */
 inline void Action_cls::GetInteriorInfo( uint8_t InfoID, uint8_t *pState, uint8_t *pPara )
 {
     *pState = InteriorInfoTbl[InfoID].State;
@@ -898,7 +1031,6 @@ inline void Action_cls::SetInteriorInfo( uint8_t InfoID, uint8_t State, uint8_t 
         InteriorInfoTbl[InfoID].State = (InteriorInfoState_enum)State;
     }
 
-    InteriorInfoTbl[InfoID].State = (InteriorInfoState_enum)State;
     if ( INVALID != Para )
     {
         InteriorInfoTbl[InfoID].Para = Para;
@@ -918,7 +1050,7 @@ void Action_cls::QueryTimeProc( uint8_t TimeOn100ms )
 {
     uint8_t &LastTime = InteriorInfoTbl[TIMER].Para;
 
-    if ( (unsigned uint8_t)(TimeOn100ms - LastTime) < ACTION_QUERYTIMER_T )
+    if ( (uint8_t)(TimeOn100ms - LastTime) < ACTION_QUERYTIMER_T )
     {
         return;
     }

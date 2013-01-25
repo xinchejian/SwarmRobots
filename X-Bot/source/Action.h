@@ -13,26 +13,29 @@
 
 /*   */
 
-//B-Step = Big Step = the lenth of robot (have enough space to rotate)
-//S-Step = Small Step = one step of motor = one third of Big Step (avoid colliding)
-#define BIGSTEP_TIMES 8
+//B-Step = Big Step = the length of robot (provide enough space to rotate)
+//S-Step = Small Step = one step of motor = one third of a Big Step (avoid colliding)
+
+
+typedef struct
+{
+    uint8_t Para;
+    uint8_t State;
+}InteriorInfoRec_stru;
 
 // InteriorInfoID_enum is used as index of a array
 typedef enum
 {
     ROBOT_TYPE,       //state: always INFO_STATE_TRUE
-    TASK_STAGE,       //Para: used as TTLcnt  state: LOOKINGFOOD FOUNDFOOD GETFOOD LOOKINGPOWER FOUNDPOWER ...
+    TASK_STAGE,       //Para: the stage of Task, see state: TS_  of InteriorInfoState_enum
     IS_ENVINFO,       //
     IS_ACTION_MOVE,   //
     IS_MOVING,        //
-    IS_REPEAT_SWING,  //state: false true
-    IS_BIGSTEP,       // state: false true
-    LASTMOVE,
     TARGET,           //paraA: RobotID;  state: NULL SET ARRIVED
     FOLLOWER,         //paraA: RobotID;  state: NULL SET
     WEIGHT,           //para: uint8_t ; state:always INFO_STATE_TRUE
     POWER,            //state: FULL SHORT EMPTY
-    TIMER,            //paraA: COUNTER;  state: false true
+    TIMER,            //paraA: timer count;  state: false true
     COUNTER,
     STATISTIC_STATE,
     STATISTIC_CONDITION,
@@ -77,23 +80,18 @@ enum
     MOVE_TARGET,
     MOVE_WALKAROUND,
     MOVE_SWING,
-    MOVE_STOP
+    MOVE_STOP,
+    MOVE_KEEPANGLE
 };
 
 
 #define ACTION_INTERIORINFO_NUM  INNERIOR_ID_END  //it must equal to ExteriorInfo_enum
 
-typedef struct
-{
-    uint8_t Para;
-    uint8_t State;
-}InteriorInfoRec_stru;
 
 /*  */
 typedef enum
 {
-    ENVINFO,
-    INTERIORINFO,
+    INTERIORINFO = ROBOTINFO_END,
     ANYINFO
 }InfoType_enum;
 
@@ -109,15 +107,14 @@ typedef enum
     ACTION_EXT_SENDMSG,
     ACTION_EXT_CLRMSG,
     ACTION_EXT_STATISTIC,
-    ACTION_EXT_LED,
-    ACTION_EXT_FINISH
+    ACTION_EXT_LED
 
 }ActionID_enum;
 
-
+/**TODO,  does it need add logic into Info**/
 typedef struct RuleRec
 {
-    InfoType_enum InfoType;//  ENVINFO   |      INTERIORINFO
+    uint8_t InfoType;//  ENVINFO   |      INTERIORINFO
     uint8_t InfoID;        //  RobotID   |   InteriorInfoID_enum
     uint8_t InfoPara;     //   MsgID    |   Para
     uint8_t ActionID;
@@ -131,13 +128,6 @@ typedef struct MoveRule
     MTMovDir_enum Direction;
     uint8_t Para;
 }MoveRule_stru;
-
-typedef struct AngleToDirection
-{
-    int8_t AngleB;
-    int8_t AngleE;
-    TargetPos_enum Direction;
-}AngleToDirection_stru;
 
 
 typedef struct MsgInfo
@@ -173,9 +163,14 @@ private:
     void ExecuteSendMsg();
     inline void ActionClrMsg( uint8_t RobotID, uint8_t MsgID );
     void ActionStatistic( uint8_t MsgID, uint8_t Para );
+    
     void ActionMove( uint8_t, uint8_t );
-    void ExecuteMove( MTMovDir_enum MoveDirection, uint8_t MovePara );
-    void MoveToDirection( int8_t Direct );
+    void MoveToTarget( uint8_t TagetRobotID );
+    void MoveAvoidObstacle();
+    inline void GetMTActionFromPosition( TargetPos_enum Position, MTMovDir_enum &MTDirection, uint8_t &Para );
+    void MoveWithSwing( uint8_t Para );
+    void MoveKeepAngle( uint8_t TargetID, uint8_t Angle);
+    inline void ExecuteMove( MTMovDir_enum MoveDirection, uint8_t MovePara, bool PreventPingPang = true );
 
     inline void SetInteriorInfo( uint8_t InfoID, uint8_t State, uint8_t Para = INVALID );
     inline void GetInteriorInfo( uint8_t InfoID, uint8_t *pState, uint8_t *pPara = NULL );

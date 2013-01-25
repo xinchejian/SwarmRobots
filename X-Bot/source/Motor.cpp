@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Contract: leo.yan.cn@gmail.com
+    Contact: leo.yan.cn@gmail.com
 */
 
 #include "Arduino.h"
@@ -52,11 +52,8 @@ BiMotor::BiMotor( )
 {
     MotorPin[MOTOR_INDEX_L].DriverA = MOTOR_L_DIRPINA;
     MotorPin[MOTOR_INDEX_L].DriverB = MOTOR_L_DIRPINB;
-    MotorPin[MOTOR_INDEX_L].Enable = MOTOR_L_EN_PIN;
     MotorPin[MOTOR_INDEX_R].DriverA = MOTOR_R_DIRPINA;
     MotorPin[MOTOR_INDEX_R].DriverB = MOTOR_R_DIRPINB;
-    MotorPin[MOTOR_INDEX_R].Enable = MOTOR_R_EN_PIN;
-    //todo, pwm is initilized in SENSOR. it should be to apply the resource of PWM
 
     Stop();
     //pin initialization
@@ -66,11 +63,12 @@ BiMotor::BiMotor( )
     pinMode(MotorPin[MOTOR_INDEX_R].DriverA,OUTPUT);
     pinMode(MotorPin[MOTOR_INDEX_R].DriverB,OUTPUT);
 
-    pinMode(MotorPin[MOTOR_INDEX_L].Enable,OUTPUT);
-    pinMode(MotorPin[MOTOR_INDEX_R].Enable,OUTPUT);
-
     LastMoveDirection = MT_FORWARD;
     LastMovePara = 0;
+
+    StepRepeatState = false;
+    RotateRepeatState = false;
+    RotatePingPangState = false;
 
 }
 
@@ -81,6 +79,22 @@ bool BiMotor::isMoving()
     return ( (MT_SPEED_ZERO == SpeedVal)? false : true  );
 }
 
+bool BiMotor::isStepRepeat()
+{
+    return StepRepeatState;
+}
+
+bool BiMotor::isRotateRepeat()
+{
+    return RotateRepeatState;
+}
+
+bool BiMotor::isRotatePingPang()
+{
+    return RotatePingPangState;
+}
+
+
 void BiMotor::GetMoveAciton( MTMovDir_enum &Direction, uint8_t &Para )
 {
     Direction = LastMoveDirection;
@@ -89,10 +103,14 @@ void BiMotor::GetMoveAciton( MTMovDir_enum &Direction, uint8_t &Para )
 
 
 
-void BiMotor::Move( MTMovDir_enum Direction, uint8_t Para )
+void BiMotor::Move( MTMovDir_enum Direction, uint8_t Para, MTSpeed_enum Speed )
 {
-    static MTMovDir_enum  LastSwingState = MT_FORWARD;
-    static MTMovDir_enum SwingDir = MT_CLOCKWISE;
+
+    if ( 0 == Para )
+    {
+        ASSERT_T(0);
+        return;
+    }
 
     switch ( Direction )
     {
@@ -104,45 +122,94 @@ void BiMotor::Move( MTMovDir_enum Direction, uint8_t Para )
 
     case MT_CLOCKWISE:
     case MT_ANTICLOCK:
-    case MT_CLOCKRANDOM:
         Rotate( Direction, Para );
         break;
         
-    case MT_SWING:
-
-        if ( LastSwingState != MT_SWING )
-        {
-            Para = Para>>1;
-        }
-
-        Rotate( SwingDir, Para );
-        SwingDir = ( MT_CLOCKWISE == SwingDir ) ? MT_ANTICLOCK : MT_CLOCKWISE;
-
+    case MT_TURNLEFT:
+    case MT_TURNRIGHT:
+        //todo
         break;
 
     default:
         ASSERT_T(0);
     }
 
-    LastSwingState = Direction;
+    /** RunCnt must be set before SpeedVal**/
+    SetSpeed(Speed);
+
+    Run();
+
+    Statistic( Direction, Para);
 
 }
+
+void BiMotor::Statistic( MTMovDir_enum Direction, uint8_t Para )
+{
+    static uint8_t RepeatCnt = 0;
+    static uint8_t RotatePingPangCnt = 0;
+
+    /**judge repeated single action**/
+    if ( LastMoveDirection != Direction )
+    {
+        RepeatCnt = 0;
+        StepRepeatState = false;
+        RotateRepeatState = false;
+    }
+    else
+    {
+        if ( RepeatCnt < 255 )
+        {
+            RepeatCnt++;
+        }
+    }
+
+    if ( MT_FORWARD == Direction )
+    {
+        StepRepeatState = (RepeatCnt >= REPEATED_STEP_THRESHOLD) ? true : false;
+    }
+    else if ( (MT_CLOCKWISE == Direction) || (MT_CLOCKWISE == Direction) )
+    {
+        RotateRepeatState = (RepeatCnt >= REPEATED_ROTATE_THRESHOLD) ? true : false;
+    }
+    else
+    {
+        //nothing
+    }
+
+    /**judge rotate PingPong state**/
+
+    if ( (MT_CLOCKWISE != Direction) && (MT_ANTICLOCK != Direction) )
+    {
+        RotatePingPangCnt = 0;
+    }
+    else
+    {
+        if ( (LastMoveDirection != Direction)
+                && (RotatePingPangCnt < 255) )
+        {   //the fist is maybe incorrect, but it isn't a matter if PINGPANG_ROTATE_THRESHOLD > 2.
+
+            RotatePingPangCnt++;
+        }
+    }
+
+    RotatePingPangState = (RotatePingPangCnt >= PINGPANG_ROTATE_THRESHOLD) ? true : false;
+
+    /**store info**/
+    LastMoveDirection = Direction;
+    LastMovePara = Para;
+}
+
 
 /* Walk == Go straight */
 
 inline void BiMotor::Walk(
         MTMovDir_enum Direction,
-        uint8_t Distance,         //the unit is 1 cm
-        MTSpeed_enum Speed
+        uint8_t Distance         //the unit is 1 cm
         )
 {
     MTSingleAct_enum Action;
     uint8_t i;
-    //todo:check para
-    //if ( 0 == Distance )
-    //{
-    //    return;
-    //}
+
 
     /*set direction*/
     switch(Direction)
@@ -169,15 +236,7 @@ inline void BiMotor::Walk(
         SetSingleMotorAction( i, Action);
     }
 
-    /** RunCnt must be set before SpeedVal**/
-    Distance = (0 == Distance) ? 1 : Distance;
-    SetMoveDistance(Distance);
-    SetSpeed(Speed);
-
-    Run();
-
-    LastMoveDirection = Direction;
-    LastMovePara = Distance;
+    RunCnt = (uint32_t)Distance * MT_STEP_ONE;      // todo: to add measure program later
 }
 
 
@@ -187,26 +246,9 @@ inline void BiMotor::Walk(
 
 inline void BiMotor::Rotate(
         MTMovDir_enum Direction,
-        uint8_t Angle,            // the unit is 10 degree
-        MTSpeed_enum Speed
+        uint8_t Angle              // the unit is 10 degree
         )
 {
-
-    if ( MT_CLOCKRANDOM == Direction )
-    {
-        randomSeed(millis());
-        Direction = (0 == random(2)) ? MT_CLOCKWISE : MT_ANTICLOCK;
-    }
-
-    if ( ANGLE_RANDOM == Angle )
-    {
-        Angle = random(6);
-    }
-
-    if ( 0 == Angle )
-    {
-        return;
-    }
 
     /*set dirction*/
     switch(Direction)
@@ -226,14 +268,7 @@ inline void BiMotor::Rotate(
 
     }
 
-    /** RunCnt must be set before SpeedVal**/
-    SetRotateAngle(Angle);
-    SetSpeed(Speed);
-
-    Run();
-
-    LastMoveDirection = Direction;
-    LastMovePara = Angle;
+    RunCnt = (uint32_t)Angle * MT_ROTATE_ONE;  // todo: to add measure program later
 }
 
 inline void BiMotor::Stop( )
@@ -252,7 +287,7 @@ inline void BiMotor::Stop( )
 /*private*/
 inline void BiMotor::Run( )
 {
-
+    /*if the driver chip has Enable pin, add code here*/
 }
 
 /*
@@ -292,19 +327,6 @@ void BiMotor::SetSingleMotorAction( uint8_t Index, MTSingleAct_enum Action )
 inline void BiMotor::SetSpeed( MTSpeed_enum Speed )
 {
     SpeedVal = Speed;
-}
-
-
-
-inline void BiMotor::SetMoveDistance( uint8_t Distance )
-{
-    RunCnt = (uint32_t)Distance * MT_STEP_ONE;      // todo: to add measure program later
-}
-
-inline void BiMotor::SetRotateAngle( uint8_t Angle )
-{
-
-    RunCnt = (uint32_t)Angle * MT_ROTATE_ONE;  // todo: to add measure program later
 }
 
 

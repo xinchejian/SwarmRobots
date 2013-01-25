@@ -19,6 +19,7 @@
 /*define the type of robot(it is also used as MsgID_enum).  because #if cannot use enumeration, so use Macro*/
 #define ROBOT_TYPE_ANT  0x10
 #define ROBOT_TYPE_ANT_LINEUP 0x11
+#define ROBOT_TYPE_ANT_SAMEDIRECTION 0x12
 #define ROBOT_TYPE_FOOD 0x21
 
 #define ROBOT_TYPE_POWERSTATION 0x70  //cannot move.
@@ -29,11 +30,11 @@
 
 /*Special ID of robot*/
 #define ROBOT_ID_SPECIAL_START  0XF0
-#define ROBOT_ID_TYPE    0XFA
+#define ROBOT_ID_POLLING  0XFA   //Poll id
 #define ROBOT_ID_SOURCE  0XFB
 #define ROBOT_ID_TARGET  0XFC
 #define ROBOT_ID_FOLLOWER 0XFD
-#define ROBOT_ID_LESS    0XFE  //any id who is less than mine
+#define ROBOT_ID_NONE    0XFE
 #define ROBOT_ID_ANY     0XFF
 
 #define ROBOT_GROUP_BITS 3
@@ -66,6 +67,7 @@ enum SW_ERRINFO
 #endif
 
 #define INVALID 0XFF
+#define SIGNED_INVALID 0X7F
 
 #if _DEBUG
     //ref AVRlib " assert(e)    __assert(__func__, __FILE__, __LINE__, #e))
