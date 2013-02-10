@@ -1,3 +1,15 @@
+/* The type of MSG:
+ * 1)broadcast:  robotID = ROBOT_ID_ANY
+ * 2)Singlecast: robotID = specific ID
+ *
+ * or
+ * 1)common msg:
+ * 2)special msg:  MsgID = special ID
+ *
+ */
+
+
+
 #ifndef _h
 #define _h
 
@@ -59,8 +71,15 @@ typedef enum
     ROBOTINFO_TYPE,
     ROBOTINFO_NEAR,
     ROBOTINFO_MSG_LESSID,
+    ROBOTINFO_GRP,
     ROBOTINFO_END
 }RobotInfoKind_enum;
+
+enum
+{
+    GRP_SAME
+};
+
 
 typedef struct TargetToAngle
 {

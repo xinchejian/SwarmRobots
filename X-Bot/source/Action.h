@@ -64,12 +64,14 @@ typedef enum
     TS_TASKOVER,
     TS_LOOKING,
     TS_FOUND,
-    TS_CLOSED,
+    TS_NEAR,
     TS_GOTTEN,
     TS_Lonely,
     TS_Following,
     TS_BeFollowed,
     TS_BeNode,
+    TASK_Safe,
+    TASK_Danger,
     TS_OUTOFPOWER,
 
     INFO_STATE_END
@@ -77,11 +79,13 @@ typedef enum
 
 enum
 {
-    MOVE_TARGET,
-    MOVE_WALKAROUND,
-    MOVE_SWING,
-    MOVE_STOP,
-    MOVE_KEEPANGLE
+    MOVE_TARGET,       //move to the Target, it will move always
+    MOVE_WALKAROUND,   //walk around,  it will randomly rotate after moving straight for a while.
+    MOVE_SWING,        //swing itself
+    MOVE_STOP,         //stop, in order to delay sometime, it cannot occupy any time of MCU.
+    MOVE_KEEPANGLE_VECTOR,    //rotate itself and keep the specific angle to the face of Target; it looks the Target as a vector.
+    MOVE_KEEPANGLE_POINT,    //rotate itself and keep the specific angle to the Target; it looks the Target as a point.
+    MOVE_MANUAL        //using the original moving action of Motor
 };
 
 
@@ -165,11 +169,13 @@ private:
     void ActionStatistic( uint8_t MsgID, uint8_t Para );
     
     void ActionMove( uint8_t, uint8_t );
-    void MoveToTarget( uint8_t TagetRobotID );
+    void MoveToTarget( uint8_t TagetRobotID, uint8_t CrossAngle );
     void MoveAvoidObstacle();
     inline void GetMTActionFromPosition( TargetPos_enum Position, MTMovDir_enum &MTDirection, uint8_t &Para );
     void MoveWithSwing( uint8_t Para );
     void MoveKeepAngle( uint8_t TargetID, uint8_t Angle);
+    void MoveKeepPointAngle( uint8_t TargetID, uint8_t Angle);
+
     inline void ExecuteMove( MTMovDir_enum MoveDirection, uint8_t MovePara, bool PreventPingPang = true );
 
     inline void SetInteriorInfo( uint8_t InfoID, uint8_t State, uint8_t Para = INVALID );

@@ -61,9 +61,7 @@ typedef enum
 
 #define IR_COMM_START_BITNUM 2  //start bis number
 #define IR_COMM_BITCUR_INIT ( 8 - IR_COMM_START_BITNUM )
-#define IR_DATA_TTL 5    //TTL message in the buffer of ReceiveBuf_stru or TxBuf_stru
 
-//#define IR_CARRIER_FRENQUENCY 38000
 
 
 /*To define the data format about communication*/

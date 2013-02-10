@@ -29,7 +29,7 @@
 /* Near Distance = the distance of near detecting = as 1.5 times as lenth of robot, on the condition of suggest material
  */
 
-#define MT_STEP_ONE 800   // 400 for 0.5cm
+#define MT_STEP_ONE 600   // 400 for 0.5cm
 
 #define MT_ROTATE_ONE 400  // 10degre  180degree = 18*350
 

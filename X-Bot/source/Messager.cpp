@@ -531,6 +531,14 @@ uint8_t Messager_cls::GetEnvRobotInfo( uint8_t InfoKind, uint8_t RobotID, uint8_
                 }
                 break;
 
+            case ROBOTINFO_GRP:
+                if ( IS_SAMEGROUP(pRobotInfo->RobotID) == Para)
+                {
+                    Flag = true;
+                }
+
+                break;
+
             default:
                 ASSERT_T(0);
 

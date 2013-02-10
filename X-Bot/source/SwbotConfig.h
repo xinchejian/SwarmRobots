@@ -5,14 +5,14 @@
 
 
 #define _START_TEST 0  //@ Control whether there is a test of Motors and IR
-#define _START_REMOTE_CONTROL 0  //@ Control whether the robot is activated by remote controller (such as TV controller)
+#define _START_REMOTE_CONTROL 1  //@ Control whether the robot is activated by remote controller (such as TV controller)
 
 /***Define the role of robot. ***/
-#define ROBOT_INIT_TYPE  ROBOT_TYPE_ANT_LINEUP   //@The type refer to SwarmRobot.h
+#define ROBOT_INIT_TYPE  ROBOT_TYPE_GROUPS   //@The type refer to SwarmRobot.h
 
 /***Define the robot ID. !!!Attention: The ID must be different from each other ***/
 #define ROBOT_GROUP 1    //@ Set the No. of your group, it must be less than pow(2,ROBOT_GROUP_BITS) = 8
-#define ROBOT_INNERID 1  //@ Set the internal ID in one group. it must be less than pow(2,ROBOT_INNERID_BITS) = 32
+#define ROBOT_INNERID 2  //@ Set the internal ID in one group. it must be less than pow(2,ROBOT_INNERID_BITS) = 32
 
 /***Define the intensity of IR-LED***/
 #define IR_POWER_DUTY 25        //@ Define the intensity of IR-LED. The value is also the duty of PWM = ( IR_POWER_DUTY/255 )
